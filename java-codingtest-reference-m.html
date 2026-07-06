@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Java 코딩테스트 레퍼런스 · 모바일</title>
+<style>
+  :root{
+    --paper:#f6f0e3; --card:#fffdf7; --line:#e7ddca; --ink:#2f2a22; --muted:#8a7f6c;
+    --brass:#b07d34; --slate:#4a5568; --chip:#f3ecdd;
+    --accent:#b07d34; --accent-soft:#f3ecdd; --code-bg:#1e1e2e;
+    --tip-bg:#f3ecdd; --tip-bd:#e2d3b0;
+    --g1:#2f6fb0; --g2:#7a5bb0; --g3:#2f8f9c; --g4:#3f9160;
+    --mb:#b5652a; --jpa:#3f9160;
+    --mono:ui-monospace,SFMono-Regular,Menlo,"Cascadia Mono","Roboto Mono",monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI","Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --paper:#1a1712; --card:#232019; --line:#3b3529; --ink:#ece5d6; --muted:#9a8f7c;
+      --brass:#d3a05a; --slate:#aeb7c4; --chip:#2c2820;
+      --accent:#d3a05a; --accent-soft:#2c2820;
+      --tip-bg:#221d15; --tip-bd:#3b3529;
+      --g1:#5b9bd5; --g2:#a98fd8; --g3:#4fb3c0; --g4:#63c08a;
+      --mb:#e0975a; --jpa:#63c08a;
+    }
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);
+    font-size:16px;line-height:1.62;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:720px;margin:0 auto;padding:0 14px 90px}
+  header.top{position:sticky;top:0;z-index:20;
+    background:color-mix(in srgb,var(--paper) 90%,transparent);
+    backdrop-filter:blur(8px);border-bottom:1px solid var(--line);margin:0 -14px;padding:12px 14px}
+  header.top h1{margin:0;font-size:18px;letter-spacing:-.01em}
+  header.top .sub{color:var(--muted);font-size:12px;margin-top:3px;line-height:1.45}
+  nav.toc{display:flex;flex-wrap:wrap;gap:6px;margin-top:11px}
+  nav.toc a{font-size:12.5px;text-decoration:none;color:var(--ink);background:var(--card);
+    border:1px solid var(--line);border-radius:999px;padding:5px 11px;line-height:1;font-family:var(--mono)}
+  nav.toc a:active{background:var(--chip);border-color:var(--brass);color:var(--brass)}
+  @media(hover:hover){nav.toc a:hover{border-color:var(--brass);color:var(--brass)}}
+  .grouphead{margin:34px 0 4px;font-size:11px;font-weight:700;letter-spacing:1px;
+    text-transform:uppercase;color:#fff;display:inline-block;padding:4px 12px;border-radius:6px;font-family:var(--mono)}
+  .grouphead.g1{background:var(--g1)}.grouphead.g2{background:var(--g2)}
+  .grouphead.g3{background:var(--g3)}.grouphead.g4{background:var(--g4)}
+  .grouphead.mb{background:var(--mb)}.grouphead.jpa{background:var(--jpa)}
+  section.card{background:var(--card);border:1px solid var(--line);border-radius:13px;
+    padding:16px 15px;margin-top:13px;scroll-margin-top:74px}
+  section.card h2{margin:0 0 5px;font-size:16px;letter-spacing:-.01em}
+  section.card h2 .num{color:var(--brass);font-weight:800;margin-right:7px;font-family:var(--mono)}
+  section.card .desc{color:var(--muted);font-size:13.5px;margin:0 0 12px}
+  h3.subh{font-size:13px;margin:16px 0 6px;font-weight:700;border-left:3px solid var(--brass);padding-left:8px}
+  h3.subh.xml{border-left-color:var(--mb)}
+  pre.code{background:var(--code-bg);border-radius:9px;padding:12px 13px;overflow-x:auto;
+    margin:8px 0;font-size:12.6px;line-height:1.58;font-family:var(--mono);color:#d4d4d4;
+    -webkit-overflow-scrolling:touch}
+  pre.code.xml{background:#18202f;border:1px solid #2b3a55}
+  pre.code code{white-space:pre;font-family:inherit}
+  .tok-cm{color:#7a9c6b}.tok-str{color:#e0a071}.tok-kw{color:#66a3e0}
+  .tok-ty{color:#4ec9b0}.tok-num{color:#b5cea8}.tok-an{color:#e5c07b}
+  .tip{background:var(--tip-bg);border:1px solid var(--tip-bd);border-radius:10px;
+    padding:11px 13px;margin-top:13px;font-size:13px}
+  .tip b{color:var(--brass)}
+  .tip ul{margin:6px 0 0;padding-left:17px}.tip li{margin:4px 0}
+  table.mini{width:100%;border-collapse:collapse;margin:8px 0;font-size:12.5px;display:block;overflow-x:auto}
+  table.mini th,table.mini td{border:1px solid var(--line);padding:7px 9px;text-align:left;vertical-align:top;min-width:88px}
+  table.mini th{background:var(--chip);font-weight:700}
+  code.inl{background:var(--chip);border:1px solid var(--line);border-radius:5px;padding:1px 5px;
+    font-size:12.5px;font-family:var(--mono);color:var(--mb)}
+  footer{margin-top:30px;text-align:center;color:var(--muted);font-size:12px;font-family:var(--mono);line-height:1.7}
+  .guide{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:16px 15px;margin-top:13px}
+  .guide h2{margin:0 0 10px;font-size:15px}
+  .guide table th{background:var(--chip)}
+  .cmp{display:grid;grid-template-columns:1fr;gap:12px;margin-top:14px}
+  .cmp .box{border-radius:13px;padding:15px 16px;border:1px solid var(--line);background:var(--card)}
+  .cmp .box.mb{border-top:4px solid var(--mb)}
+  .cmp .box.jpa{border-top:4px solid var(--jpa)}
+  .cmp .box h3{margin:0 0 8px;font-size:15px}
+  .cmp .box.mb h3{color:var(--mb)}.cmp .box.jpa h3{color:var(--jpa)}
+  .cmp .box ul{margin:0;padding-left:17px;font-size:13px}.cmp .box li{margin:5px 0}
+  .badge{display:inline-block;font-size:10.5px;font-weight:700;padding:1px 7px;border-radius:5px;
+    margin-left:6px;vertical-align:middle;background:var(--chip);color:var(--brass);font-family:var(--mono)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="top">
+  <h1>🧩 Java 코딩테스트 레퍼런스</h1>
+  <div class="sub">입출력·탐색·핵심 알고리즘 템플릿 · 복붙 후 문제에 맞게 변수만 조정</div>
+  <nav class="toc">
+    <a href="#guide">유형 고르기</a><a href="#s1">입출력</a><a href="#s2">정렬</a>
+    <a href="#s3">완전탐색</a><a href="#s4">재귀·백트래킹</a><a href="#s5">BFS</a>
+    <a href="#s6">DFS</a><a href="#s7">이분탐색</a><a href="#s8">투포인터</a>
+    <a href="#s9">누적합</a><a href="#s10">DP</a>
+  </nav>
+</header>
+
+<div class="guide" id="guide">
+  <h2>🎯 유형 고르기 — 문제를 읽고 이 표로 매핑</h2>
+  <table class="mini">
+    <tr><th>문제에서 이런 말이 나오면</th><th>이 유형</th></tr>
+    <tr><td>최단 거리 / 최소 이동 횟수 (가중치 없음)</td><td>BFS</td></tr>
+    <tr><td>모든 경로 / 연결 요소 / 미로 채우기</td><td>DFS 또는 BFS</td></tr>
+    <tr><td>모든 조합 · 순열을 만들어 확인</td><td>백트래킹(재귀)</td></tr>
+    <tr><td>정렬된 데이터에서 특정 값 / "~이하 최대" 찾기</td><td>이분탐색</td></tr>
+    <tr><td>"최댓값의 최소" / "최소 시간" 결정 문제</td><td>파라메트릭 서치(이분탐색)</td></tr>
+    <tr><td>정렬 후 양 끝에서 좁혀가기 / 구간 합</td><td>투포인터 · 슬라이딩 윈도우</td></tr>
+    <tr><td>"구간 [i, j]의 합"을 여러 번 질의</td><td>누적합(prefix sum)</td></tr>
+    <tr><td>"경우의 수" / "최대·최소" + 부분문제 반복</td><td>DP</td></tr>
+    <tr><td>N이 아주 작다(≤ 20), 모든 경우 나열 가능</td><td>완전탐색 / 비트마스크</td></tr>
+  </table>
+  <p style="margin:8px 0 0;font-size:12.5px;color:var(--muted)">
+    시간복잡도 감: N이 10⁸ 근처면 O(N)·O(N log N)까지, 10⁴이면 O(N²)도 통과, 20 이하면 O(2ᴺ) 완전탐색 가능.
+  </p>
+</div>
+
+<div class="grouphead g1">입출력 · 정렬</div>
+
+<section class="card" id="s1">
+  <h2><span class="num">01</span>입출력 (표준 템플릿)</h2>
+  <p class="desc"><code class="inl">Scanner</code>는 편하지만 느리다. 입력이 많으면 <code class="inl">BufferedReader</code> + <code class="inl">StringBuilder</code>가 정석.</p>
+  <h3 class="subh">빠른 입출력 템플릿 (권장)</h3>
+<pre class="code"><script type="text/x-code">
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        StringBuilder sb = new StringBuilder();
+
+        int n = Integer.parseInt(br.readLine());        // 첫 줄: 정수 1개
+
+        // 한 줄에 공백으로 여러 수: "1 2 3 4"
+        StringTokenizer st = new StringTokenizer(br.readLine());
+        int[] arr = new int[n];
+        for (int i = 0; i < n; i++) arr[i] = Integer.parseInt(st.nextToken());
+
+        // 한 줄에 두 수: "a b"
+        st = new StringTokenizer(br.readLine());
+        int a = Integer.parseInt(st.nextToken());
+        int b = Integer.parseInt(st.nextToken());
+
+        // 여러 줄 반복 입력
+        for (int i = 0; i < n; i++) {
+            String line = br.readLine();
+            // ...
+        }
+
+        // 출력은 sb에 모아서 한 번에 (println 반복은 느림)
+        sb.append(a + b).append('\n');
+        System.out.print(sb);
+    }
+}
+</script></pre>
+  <h3 class="subh">Scanner (간단한 문제용)</h3>
+<pre class="code"><script type="text/x-code">
+Scanner sc = new Scanner(System.in);
+int n = sc.nextInt();
+String s = sc.next();          // 공백 전까지 한 토큰
+String line = sc.nextLine();   // 한 줄 전체 (nextInt 뒤엔 개행 처리 주의)
+</script></pre>
+  <div class="tip"><b>실전 팁</b>
+    <ul>
+      <li>입력이 수만 줄 이상이면 Scanner는 시간초과 위험 → <code class="inl">BufferedReader</code>.</li>
+      <li>출력이 많으면 <code class="inl">System.out.println</code> 반복 대신 <code class="inl">StringBuilder</code>에 모아 마지막에 한 번 출력.</li>
+      <li><code class="inl">br.readLine()</code>은 <code class="inl">IOException</code>을 던지므로 <code class="inl">main(...) throws IOException</code>.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="card" id="s2">
+  <h2><span class="num">02</span>정렬 (기준 커스텀)</h2>
+  <p class="desc">코테 절반은 "정렬하고 나면 쉬워지는" 문제. 다중 기준 정렬을 자유롭게.</p>
+<pre class="code"><script type="text/x-code">
+int[] a = {5, 2, 8, 1};
+Arrays.sort(a);                        // 오름차순 (기본형은 이것만 가능)
+
+// 내림차순은 Integer[] (박싱) 필요
+Integer[] b = {5, 2, 8, 1};
+Arrays.sort(b, Collections.reverseOrder());
+
+// 2차원 배열 정렬: 0번째 기준 오름차순, 같으면 1번째 내림차순
+int[][] arr = {{1,3},{1,2},{2,1}};
+Arrays.sort(arr, (x, y) -> {
+    if (x[0] != y[0]) return x[0] - y[0];   // 오름차순
+    return y[1] - x[1];                      // 내림차순
+});
+
+// List 정렬
+List<int[]> list = new ArrayList<>();
+list.sort(Comparator.comparingInt((int[] p) -> p[0])
+                    .thenComparing(p -> p[1], Comparator.reverseOrder()));
+
+// 문자열: 길이순, 같으면 사전순
+String[] words = {"bb","a","ccc","aa"};
+Arrays.sort(words, (x, y) ->
+    x.length() != y.length() ? x.length() - y.length() : x.compareTo(y));
+</script></pre>
+  <div class="tip"><b>실전 팁</b>
+    <ul>
+      <li>기본형 배열(<code class="inl">int[]</code>)은 내림차순 정렬 API가 없다 → <code class="inl">Integer[]</code>로 바꾸거나 오름차순 후 뒤집기.</li>
+      <li>비교식 <code class="inl">x - y</code>는 값이 크면 오버플로 위험 → 안전하게 <code class="inl">Integer.compare(x, y)</code>.</li>
+    </ul>
+  </div>
+</section>
+
+<div class="grouphead g2">완전탐색 · 재귀</div>
+
+<section class="card" id="s3">
+  <h2><span class="num">03</span>완전탐색 (브루트포스)</h2>
+  <p class="desc">N이 작을 때 모든 경우를 다 확인. 중첩 반복문·비트마스크가 대표적.</p>
+<pre class="code"><script type="text/x-code">
+// 모든 쌍 확인 O(N²)
+for (int i = 0; i < n; i++)
+    for (int j = i + 1; j < n; j++)
+        check(arr[i], arr[j]);
+
+// 부분집합 전체 순회 (비트마스크) — N ≤ 20
+for (int mask = 0; mask < (1 << n); mask++) {   // 0 ~ 2^n-1
+    int sum = 0;
+    for (int i = 0; i < n; i++)
+        if ((mask & (1 << i)) != 0)             // i번째가 선택됐나
+            sum += arr[i];
+    // sum으로 판정
+}
+</script></pre>
+  <div class="tip"><b>실전 팁</b>
+    <ul>
+      <li><code class="inl">1 &lt;&lt; n</code> = 2ⁿ. <code class="inl">mask &amp; (1 &lt;&lt; i)</code>로 i번째 원소 선택 여부 확인.</li>
+      <li>N ≤ 20이면 2²⁰ ≈ 100만 → 비트마스크 완전탐색 가능.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="card" id="s4">
+  <h2><span class="num">04</span>재귀 · 백트래킹</h2>
+  <p class="desc">조합·순열을 만들며 탐색하고, 아니면 되돌린다(선택 → 재귀 → 선택 취소).</p>
+  <h3 class="subh">순열 (nPr) / 조합 (nCr)</h3>
+<pre class="code"><script type="text/x-code">
+static int n, r;
+static int[] arr, pick;
+static boolean[] used;
+
+// 순열: 순서 O
+static void permutation(int depth) {
+    if (depth == r) { print(pick); return; }
+    for (int i = 0; i < n; i++) {
+        if (used[i]) continue;
+        used[i] = true;  pick[depth] = arr[i];   // 선택
+        permutation(depth + 1);                  // 재귀
+        used[i] = false;                         // 되돌리기(백트래킹)
+    }
+}
+
+// 조합: 순서 X (start로 앞은 다시 안 봄)
+static void combination(int start, int depth) {
+    if (depth == r) { print(pick); return; }
+    for (int i = start; i < n; i++) {
+        pick[depth] = arr[i];
+        combination(i + 1, depth + 1);
+    }
+}
+</script></pre>
+  <h3 class="subh">백트래킹 (가지치기) — N-Queen 골격</h3>
+<pre class="code"><script type="text/x-code">
+static int n, count = 0;
+static int[] col;   // col[row] = 놓은 열
+
+static void solve(int row) {
+    if (row == n) { count++; return; }       // 다 놓음 → 해 1개
+    for (int c = 0; c < n; c++) {
+        if (isSafe(row, c)) {                // 유효할 때만 진행(가지치기)
+            col[row] = c;
+            solve(row + 1);
+            // 배열 되돌림 불필요(다음 c가 덮어씀)
+        }
+    }
+}
+static boolean isSafe(int row, int c) {
+    for (int r = 0; r < row; r++) {
+        if (col[r] == c) return false;                    // 같은 열
+        if (Math.abs(col[r] - c) == Math.abs(r - row)) return false; // 대각선
+    }
+    return true;
+}
+</script></pre>
+  <div class="tip"><b>실전 팁</b>
+    <ul>
+      <li>백트래킹의 핵심: <b>선택 → 재귀 → 선택 취소</b>. 상태를 공유(필드/배열)하면 반드시 원복.</li>
+      <li>불가능한 경로를 조기에 잘라내는 <b>가지치기</b>(isSafe 등)가 성능을 결정한다.</li>
+      <li>종료 조건(base case)을 먼저 쓰고, 무한재귀·인덱스 범위를 항상 확인.</li>
+    </ul>
+  </div>
+</section>
+
+<div class="grouphead g3">그래프 탐색</div>
+
+<section class="card" id="s5">
+  <h2><span class="num">05</span>BFS (너비 우선 · 최단거리)</h2>
+  <p class="desc">큐로 가까운 곳부터. <b>가중치 없는 그래프의 최단 거리</b>는 BFS가 정답.</p>
+  <h3 class="subh">격자(2D) BFS — 미로 최단거리</h3>
+<pre class="code"><script type="text/x-code">
+static int[] dx = {-1, 1, 0, 0};   // 상하좌우
+static int[] dy = {0, 0, -1, 1};
+
+static int bfs(int[][] grid, int sr, int sc) {
+    int R = grid.length, C = grid[0].length;
+    boolean[][] visited = new boolean[R][C];
+    int[][] dist = new int[R][C];
+    Queue<int[]> q = new ArrayDeque<>();
+
+    q.offer(new int[]{sr, sc});
+    visited[sr][sc] = true;
+
+    while (!q.isEmpty()) {
+        int[] cur = q.poll();
+        int x = cur[0], y = cur[1];
+        for (int d = 0; d < 4; d++) {
+            int nx = x + dx[d], ny = y + dy[d];
+            if (nx < 0 || ny < 0 || nx >= R || ny >= C) continue;  // 범위 밖
+            if (visited[nx][ny] || grid[nx][ny] == 0) continue;    // 방문/벽
+            visited[nx][ny] = true;
+            dist[nx][ny] = dist[x][y] + 1;                          // 거리 누적
+            q.offer(new int[]{nx, ny});
+        }
+    }
+    return dist[R - 1][C - 1];   // 목표 지점까지 거리
+}
+</script></pre>
+  <h3 class="subh">인접 리스트 그래프 BFS</h3>
+<pre class="code"><script type="text/x-code">
+static List<List<Integer>> graph;   // graph.get(u) = u의 이웃들
+static boolean[] visited;
+
+static void bfs(int start) {
+    Queue<Integer> q = new ArrayDeque<>();
+    q.offer(start);  visited[start] = true;
+    while (!q.isEmpty()) {
+        int u = q.poll();
+        for (int v : graph.get(u)) {
+            if (!visited[v]) { visited[v] = true; q.offer(v); }
+        }
+    }
+}
+</script></pre>
+  <div class="tip"><b>실전 팁</b>
+    <ul>
+      <li><b>visited는 큐에 넣는 시점</b>에 표시한다(꺼낼 때 하면 중복 삽입으로 폭발).</li>
+      <li>가중치가 모두 1이면 BFS = 최단거리. 가중치가 다르면 다익스트라(우선순위 큐).</li>
+      <li>격자 이동은 <code class="inl">dx/dy</code> 배열로 4방향(또는 8방향)을 반복문 하나로 처리.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="card" id="s6">
+  <h2><span class="num">06</span>DFS (깊이 우선)</h2>
+  <p class="desc">재귀(또는 스택)로 끝까지 파고든다. 연결요소·경로 탐색·백트래킹의 기반.</p>
+<pre class="code"><script type="text/x-code">
+// 재귀 DFS — 인접 리스트
+static List<List<Integer>> graph;
+static boolean[] visited;
+
+static void dfs(int u) {
+    visited[u] = true;
+    // 방문 처리(합산/기록 등)
+    for (int v : graph.get(u))
+        if (!visited[v]) dfs(v);
+}
+
+// 격자 DFS — 연결 요소(섬) 개수 세기
+static int[] dx = {-1,1,0,0}, dy = {0,0,-1,1};
+static void dfs(int[][] grid, boolean[][] vis, int x, int y) {
+    vis[x][y] = true;
+    for (int d = 0; d < 4; d++) {
+        int nx = x + dx[d], ny = y + dy[d];
+        if (nx < 0 || ny < 0 || nx >= grid.length || ny >= grid[0].length) continue;
+        if (vis[nx][ny] || grid[nx][ny] == 0) continue;
+        dfs(grid, vis, nx, ny);
+    }
+}
+static int countIslands(int[][] grid) {
+    boolean[][] vis = new boolean[grid.length][grid[0].length];
+    int cnt = 0;
+    for (int i = 0; i < grid.length; i++)
+        for (int j = 0; j < grid[0].length; j++)
+            if (grid[i][j] == 1 && !vis[i][j]) { dfs(grid, vis, i, j); cnt++; }
+    return cnt;
+}
+</script></pre>
+  <div class="tip"><b>실전 팁</b>
+    <ul>
+      <li>재귀 DFS는 깊이가 크면(수십만) <b>StackOverflow</b> 위험 → 그럴 땐 스택 자료구조로 반복 구현.</li>
+      <li><b>BFS vs DFS</b>: 최단거리는 BFS, 모든 경로·조합 탐색·연결요소는 DFS가 자연스럽다.</li>
+    </ul>
+  </div>
+</section>
+
+<div class="grouphead g4">탐색 · 구간 · DP</div>
+
+<section class="card" id="s7">
+  <h2><span class="num">07</span>이분탐색 (Binary Search)</h2>
+  <p class="desc">정렬된 데이터에서 O(log N). "~이하 최대/이상 최소" lower/upper bound, 파라메트릭 서치가 핵심.</p>
+<pre class="code"><script type="text/x-code">
+// 기본: target의 인덱스 (없으면 -1)
+static int search(int[] a, int target) {
+    int lo = 0, hi = a.length - 1;
+    while (lo <= hi) {
+        int mid = (lo + hi) >>> 1;          // 오버플로 방지 시프트
+        if (a[mid] == target) return mid;
+        else if (a[mid] < target) lo = mid + 1;
+        else hi = mid - 1;
+    }
+    return -1;
+}
+
+// lower bound: target 이상이 처음 나오는 위치
+static int lowerBound(int[] a, int target) {
+    int lo = 0, hi = a.length;
+    while (lo < hi) {
+        int mid = (lo + hi) >>> 1;
+        if (a[mid] < target) lo = mid + 1;
+        else hi = mid;
+    }
+    return lo;
+}
+
+// 파라메트릭 서치: "조건을 만족하는 최소/최대 값" 찾기 (결정 문제로 변환)
+static int parametric(int[] data) {
+    int lo = 1, hi = 1_000_000_000, answer = 0;
+    while (lo <= hi) {
+        int mid = (lo + hi) >>> 1;
+        if (possible(data, mid)) {          // mid가 가능하면
+            answer = mid;                    // 후보 기록
+            lo = mid + 1;                    // 더 큰 값 시도(최대 구할 때)
+        } else {
+            hi = mid - 1;
+        }
+    }
+    return answer;
+}
+</script></pre>
+  <div class="tip"><b>실전 팁</b>
+    <ul>
+      <li>이분탐색 전제: <b>데이터가 정렬</b>되어 있어야 한다.</li>
+      <li>"최댓값을 최소로 / 최소 시간" 같은 최적화 문제는 답을 <code class="inl">mid</code>로 가정하고 가능한지(possible) 판정하는 <b>파라메트릭 서치</b>로 푼다.</li>
+      <li><code class="inl">(lo+hi)/2</code>는 오버플로 위험 → <code class="inl">(lo+hi)&gt;&gt;&gt;1</code> 또는 <code class="inl">lo+(hi-lo)/2</code>.</li>
+      <li>Java 내장: <code class="inl">Arrays.binarySearch(a, key)</code>, <code class="inl">Collections.binarySearch(list, key)</code>.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="card" id="s8">
+  <h2><span class="num">08</span>투포인터 · 슬라이딩 윈도우</h2>
+  <p class="desc">두 포인터로 구간을 좁히거나 넓힌다. 정렬 배열의 쌍 찾기, 연속 부분합에 강력.</p>
+<pre class="code"><script type="text/x-code">
+// 정렬된 배열에서 합이 target인 두 수 (양 끝 포인터)
+static boolean twoSum(int[] a, int target) {
+    int lo = 0, hi = a.length - 1;      // a는 정렬됨
+    while (lo < hi) {
+        int sum = a[lo] + a[hi];
+        if (sum == target) return true;
+        else if (sum < target) lo++;    // 더 크게
+        else hi--;                       // 더 작게
+    }
+    return false;
+}
+
+// 슬라이딩 윈도우: 합이 S 이상인 최소 길이 부분배열
+static int minLen(int[] a, int S) {
+    int left = 0, sum = 0, best = Integer.MAX_VALUE;
+    for (int right = 0; right < a.length; right++) {
+        sum += a[right];                 // 오른쪽 확장
+        while (sum >= S) {               // 조건 만족하면 왼쪽 수축
+            best = Math.min(best, right - left + 1);
+            sum -= a[left++];
+        }
+    }
+    return best == Integer.MAX_VALUE ? 0 : best;
+}
+</script></pre>
+  <div class="tip"><b>실전 팁</b>
+    <ul>
+      <li>양 끝 투포인터는 보통 <b>정렬</b>이 전제. 연속 구간(슬라이딩 윈도우)은 정렬 없이 원본 순서로.</li>
+      <li>O(N²) 이중 반복이 시간초과일 때 투포인터로 O(N)으로 줄이는 게 전형적 패턴.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="card" id="s9">
+  <h2><span class="num">09</span>누적합 (Prefix Sum)</h2>
+  <p class="desc">구간 합을 여러 번 물어볼 때, 미리 누적합을 만들어 각 질의를 O(1)로.</p>
+<pre class="code"><script type="text/x-code">
+// 1차원: prefix[i] = a[0..i-1] 합
+int[] a = {3, 1, 4, 1, 5};
+int[] prefix = new int[a.length + 1];
+for (int i = 0; i < a.length; i++)
+    prefix[i + 1] = prefix[i] + a[i];
+
+// 구간 [l, r] 합 (0-based, 양끝 포함) = prefix[r+1] - prefix[l]
+int sum = prefix[3 + 1] - prefix[1];   // a[1]+a[2]+a[3] = 1+4+1 = 6
+
+// 2차원 누적합
+int[][] g = {{1,2,3},{4,5,6},{7,8,9}};
+int R = 3, C = 3;
+int[][] ps = new int[R + 1][C + 1];
+for (int i = 1; i <= R; i++)
+    for (int j = 1; j <= C; j++)
+        ps[i][j] = g[i-1][j-1] + ps[i-1][j] + ps[i][j-1] - ps[i-1][j-1];
+// (r1,c1)~(r2,c2) 직사각형 합 (1-based)
+// = ps[r2][c2] - ps[r1-1][c2] - ps[r2][c1-1] + ps[r1-1][c1-1]
+</script></pre>
+  <div class="tip"><b>실전 팁</b>
+    <ul>
+      <li>"구간 합을 Q번 질의" → 매번 더하면 O(NQ), 누적합이면 전처리 O(N) + 질의 O(1).</li>
+      <li>인덱스 오프바이원(off-by-one) 실수 방지로 <b>1-based 누적합 배열</b>(크기 N+1)을 쓰는 걸 권장.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="card" id="s10">
+  <h2><span class="num">10</span>DP (동적 계획법)</h2>
+  <p class="desc">큰 문제를 작은 부분문제로. 점화식을 세우고 메모이제이션(하향식) 또는 테이블(상향식).</p>
+  <h3 class="subh">1차원 DP — 피보나치 / 계단 오르기</h3>
+<pre class="code"><script type="text/x-code">
+// 상향식(Bottom-up): 계단을 1칸/2칸 오르는 경우의 수
+static int climb(int n) {
+    if (n <= 2) return n;
+    int[] dp = new int[n + 1];
+    dp[1] = 1; dp[2] = 2;
+    for (int i = 3; i <= n; i++)
+        dp[i] = dp[i-1] + dp[i-2];      // 점화식
+    return dp[n];
+}
+
+// 하향식(Top-down) + 메모이제이션
+static int[] memo;
+static int fib(int n) {
+    if (n <= 1) return n;
+    if (memo[n] != 0) return memo[n];   // 이미 계산했으면 재사용
+    return memo[n] = fib(n-1) + fib(n-2);
+}
+</script></pre>
+  <h3 class="subh">2차원 DP — 0/1 배낭(Knapsack)</h3>
+<pre class="code"><script type="text/x-code">
+// 무게 한도 W에서 가치 최대 (w[i], v[i]: i번 물건 무게·가치)
+static int knapsack(int n, int W, int[] w, int[] v) {
+    int[][] dp = new int[n + 1][W + 1];
+    for (int i = 1; i <= n; i++) {
+        for (int j = 0; j <= W; j++) {
+            dp[i][j] = dp[i-1][j];                       // i번 안 담음
+            if (j >= w[i])                                // 담을 수 있으면
+                dp[i][j] = Math.max(dp[i][j], dp[i-1][j - w[i]] + v[i]);
+        }
+    }
+    return dp[n][W];
+}
+
+// LCS(최장 공통 부분수열) 골격
+static int lcs(String a, String b) {
+    int[][] dp = new int[a.length()+1][b.length()+1];
+    for (int i = 1; i <= a.length(); i++)
+        for (int j = 1; j <= b.length(); j++)
+            dp[i][j] = (a.charAt(i-1) == b.charAt(j-1))
+                ? dp[i-1][j-1] + 1
+                : Math.max(dp[i-1][j], dp[i][j-1]);
+    return dp[a.length()][b.length()];
+}
+</script></pre>
+  <div class="tip"><b>실전 팁</b>
+    <ul>
+      <li>DP 3요소: ① <b>상태 정의</b>(dp[i]가 뭘 의미하는지) ② <b>점화식</b> ③ <b>초기값</b>.</li>
+      <li>완전탐색에 "겹치는 부분문제"가 보이면 메모이제이션으로 DP 전환.</li>
+      <li>메모 초기값이 0과 겹치면(fib(0)=0) <code class="inl">Arrays.fill(memo, -1)</code>로 "미계산" 구분.</li>
+    </ul>
+  </div>
+</section>
+
+<footer>Java 코딩테스트 레퍼런스 · 오프라인 열람 가능 · 변수 선언 위치는 실제 제출 클래스 구조에 맞게 조정</footer>
+</div>
+
+<script>
+/* 초경량 Java 구문 강조기 */
+(function () {
+  var KW = new Set(("abstract assert boolean break byte case catch char class const continue "
+    + "default do double else enum extends final finally float for goto if implements import "
+    + "instanceof int interface long native new package private protected public return short "
+    + "static strictfp super switch synchronized this throw throws transient try void volatile "
+    + "while var record sealed permits yield true false null").split(" "));
+  function esc(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+  var RE = /(\/\/[^\n]*|\/\*[\s\S]*?\*\/)|("(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*')|(@\w+)|(\b\d[\w.]*\b)|(\b[A-Za-z_]\w*\b)/g;
+  function hi(src){
+    var out="", last=0, m;
+    while ((m = RE.exec(src)) !== null){
+      out += esc(src.slice(last, m.index));
+      if (m[1])      out += '<span class="tok-cm">'+esc(m[1])+'</span>';
+      else if (m[2]) out += '<span class="tok-str">'+esc(m[2])+'</span>';
+      else if (m[3]) out += '<span class="tok-an">'+esc(m[3])+'</span>';
+      else if (m[4]) out += '<span class="tok-num">'+esc(m[4])+'</span>';
+      else if (m[5]){
+        var w=m[5];
+        if (KW.has(w)) out += '<span class="tok-kw">'+w+'</span>';
+        else if (/^[A-Z]/.test(w)) out += '<span class="tok-ty">'+w+'</span>';
+        else out += esc(w);
+      }
+      last = RE.lastIndex;
+    }
+    out += esc(src.slice(last));
+    return out;
+  }
+  document.querySelectorAll('pre.code > script[type="text/x-code"]').forEach(function(sc){
+    var pre = sc.parentNode;
+    var code = document.createElement("code");
+    code.innerHTML = hi(sc.textContent.replace(/^\n/, "").replace(/\s+$/, ""));
+    pre.innerHTML = "";
+    pre.appendChild(code);
+  });
+})();
+</script>
+</body>
+</html>
