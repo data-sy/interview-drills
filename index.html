@@ -1,0 +1,130 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SI 간이테스트 드릴 — 모음</title>
+<style>
+  :root{
+    --card:#fffdf7; --line:#e7ddca; --ink:#2f2a22; --muted:#8a7f6c;
+    --brass:#b07d34; --slate:#4a5568; --chip:#f3ecdd; --paper:#f6f0e3;
+    --mono:ui-monospace,SFMono-Regular,Menlo,"Cascadia Mono","Roboto Mono",monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI","Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --card:#232019; --line:#3b3529; --ink:#ece5d6; --muted:#9a8f7c;
+      --brass:#d3a05a; --slate:#aeb7c4; --chip:#2c2820; --paper:#1a1712;
+    }
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--paper);color:var(--ink);
+    font-family:var(--sans);font-size:16px;line-height:1.6;
+    -webkit-font-smoothing:antialiased}
+  main{max-width:760px;margin:0 auto;padding:26px 18px 72px}
+
+  header.head{margin:6px 0 22px}
+  .brand{font-family:var(--mono);font-size:12.5px;font-weight:700;color:var(--muted)}
+  .brand b{color:var(--ink)}
+  header.head h1{font-size:23px;margin:12px 0 6px;letter-spacing:-.01em}
+  header.head p{margin:0;color:var(--muted);font-size:14px}
+
+  section.cat{background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:16px 16px 18px;margin:14px 0}
+  .cat-head{display:flex;align-items:baseline;gap:9px;margin:0 0 12px;flex-wrap:wrap}
+  .badge{font-family:var(--mono);font-size:11.5px;font-weight:700;
+    color:var(--brass);background:var(--chip);border:1px solid var(--line);
+    border-radius:999px;padding:3px 11px;white-space:nowrap}
+  .cat-name{font-size:16px;font-weight:600}
+  .cat-sub{font-family:var(--mono);font-size:11.5px;color:var(--muted);margin-left:auto}
+
+  .sets{display:grid;grid-template-columns:repeat(5,1fr);gap:9px}
+  .sets a{display:flex;flex-direction:column;align-items:center;justify-content:center;
+    min-height:56px;text-decoration:none;color:var(--ink);
+    background:var(--paper);border:1px solid var(--line);border-radius:10px;
+    font-family:var(--mono);gap:2px;transition:border-color .12s,background .12s}
+  .sets a .n{font-size:19px;font-weight:700;color:var(--brass);line-height:1}
+  .sets a .lbl{font-size:10px;color:var(--muted)}
+  .sets a:active{background:var(--chip);border-color:var(--brass)}
+  @media (hover:hover){.sets a:hover{border-color:var(--brass)}}
+
+  footer{margin-top:26px;color:var(--muted);font-size:12.5px;text-align:center;
+    font-family:var(--mono);line-height:1.7}
+</style>
+
+<main>
+  <header class="head">
+    <div class="brand"><b>SI</b> 간이테스트 · 자가채점 드릴</div>
+    <h1>면접 드릴 모음</h1>
+    <p>6 카테고리 · 30 세트 · 300문항. 카테고리별 세트를 눌러 시작하세요.</p>
+  </header>
+
+  <section class="cat">
+    <div class="cat-head"><span class="badge">java</span><span class="cat-name">Java 기초·OOP</span><span class="cat-sub">50문항</span></div>
+    <div class="sets">
+      <a href="java-set1.html"><span class="n">1</span><span class="lbl">세트</span></a>
+      <a href="java-set2.html"><span class="n">2</span><span class="lbl">세트</span></a>
+      <a href="java-set3.html"><span class="n">3</span><span class="lbl">세트</span></a>
+      <a href="java-set4.html"><span class="n">4</span><span class="lbl">세트</span></a>
+      <a href="java-set5.html"><span class="n">5</span><span class="lbl">세트</span></a>
+    </div>
+  </section>
+
+  <section class="cat">
+    <div class="cat-head"><span class="badge">sql</span><span class="cat-name">SQL</span><span class="cat-sub">50문항</span></div>
+    <div class="sets">
+      <a href="sql-set1.html"><span class="n">1</span><span class="lbl">세트</span></a>
+      <a href="sql-set2.html"><span class="n">2</span><span class="lbl">세트</span></a>
+      <a href="sql-set3.html"><span class="n">3</span><span class="lbl">세트</span></a>
+      <a href="sql-set4.html"><span class="n">4</span><span class="lbl">세트</span></a>
+      <a href="sql-set5.html"><span class="n">5</span><span class="lbl">세트</span></a>
+    </div>
+  </section>
+
+  <section class="cat">
+    <div class="cat-head"><span class="badge">cs</span><span class="cat-name">기초 CS</span><span class="cat-sub">50문항</span></div>
+    <div class="sets">
+      <a href="cs-set1.html"><span class="n">1</span><span class="lbl">세트</span></a>
+      <a href="cs-set2.html"><span class="n">2</span><span class="lbl">세트</span></a>
+      <a href="cs-set3.html"><span class="n">3</span><span class="lbl">세트</span></a>
+      <a href="cs-set4.html"><span class="n">4</span><span class="lbl">세트</span></a>
+      <a href="cs-set5.html"><span class="n">5</span><span class="lbl">세트</span></a>
+    </div>
+  </section>
+
+  <section class="cat">
+    <div class="cat-head"><span class="badge">web</span><span class="cat-name">웹 기초</span><span class="cat-sub">50문항</span></div>
+    <div class="sets">
+      <a href="web-set1.html"><span class="n">1</span><span class="lbl">세트</span></a>
+      <a href="web-set2.html"><span class="n">2</span><span class="lbl">세트</span></a>
+      <a href="web-set3.html"><span class="n">3</span><span class="lbl">세트</span></a>
+      <a href="web-set4.html"><span class="n">4</span><span class="lbl">세트</span></a>
+      <a href="web-set5.html"><span class="n">5</span><span class="lbl">세트</span></a>
+    </div>
+  </section>
+
+  <section class="cat">
+    <div class="cat-head"><span class="badge">csharp</span><span class="cat-name">C#/.NET <span style="color:var(--muted);font-weight:400">(Java 대비)</span></span><span class="cat-sub">50문항</span></div>
+    <div class="sets">
+      <a href="csharp-set1.html"><span class="n">1</span><span class="lbl">세트</span></a>
+      <a href="csharp-set2.html"><span class="n">2</span><span class="lbl">세트</span></a>
+      <a href="csharp-set3.html"><span class="n">3</span><span class="lbl">세트</span></a>
+      <a href="csharp-set4.html"><span class="n">4</span><span class="lbl">세트</span></a>
+      <a href="csharp-set5.html"><span class="n">5</span><span class="lbl">세트</span></a>
+    </div>
+  </section>
+
+  <section class="cat">
+    <div class="cat-head"><span class="badge">oral</span><span class="cat-name">구두 기술질문</span><span class="cat-sub">50문항</span></div>
+    <div class="sets">
+      <a href="oral-set1.html"><span class="n">1</span><span class="lbl">세트</span></a>
+      <a href="oral-set2.html"><span class="n">2</span><span class="lbl">세트</span></a>
+      <a href="oral-set3.html"><span class="n">3</span><span class="lbl">세트</span></a>
+      <a href="oral-set4.html"><span class="n">4</span><span class="lbl">세트</span></a>
+      <a href="oral-set5.html"><span class="n">5</span><span class="lbl">세트</span></a>
+    </div>
+  </section>
+
+  <footer>
+    GitHub Pages · 정본은 비공개 repo, 렌더 결과만 배포<br>
+    data-sy.github.io/interview-drills
+  </footer>
+</main>

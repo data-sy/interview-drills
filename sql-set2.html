@@ -1,0 +1,456 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SQL · 세트 2 — 자가채점 드릴</title>
+<style>
+  :root{
+    --card:#fffdf7; --line:#e7ddca; --ink:#2f2a22; --muted:#8a7f6c;
+    --brass:#b07d34; --danger:#c0392b;
+    --safe:#3f8f5f; --safe-bg:#eef7f0; --safe-line:#bcdcc6;
+    --slate:#4a5568; --slate-bg:#eef1f5; --chip:#f3ecdd;
+    --mono:ui-monospace,SFMono-Regular,Menlo,"Cascadia Mono","Roboto Mono",monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI","Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+    --paper:#f6f0e3;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --card:#232019; --line:#3b3529; --ink:#ece5d6; --muted:#9a8f7c;
+      --brass:#d3a05a; --danger:#e07a6e;
+      --safe:#7fc79a; --safe-bg:#1d2a22; --safe-line:#2f5340;
+      --slate:#aeb7c4; --slate-bg:#262b33; --chip:#2c2820;
+      --paper:#1a1712;
+    }
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--paper);color:var(--ink);
+    font-family:var(--sans);font-size:16px;line-height:1.6;
+    -webkit-font-smoothing:antialiased}
+  code{font-family:var(--mono);font-size:.9em;background:var(--chip);
+    padding:.1em .38em;border-radius:5px}
+  pre{margin:13px 0 0;background:var(--chip);border:1px solid var(--line);
+    border-radius:9px;padding:13px 15px;overflow-x:auto}
+  pre code{background:none;padding:0;font-size:13px;line-height:1.55;display:block}
+
+  /* 상단 바 + 진행바 */
+  .bar{position:sticky;top:0;z-index:20;display:flex;align-items:center;
+    gap:12px;flex-wrap:wrap;
+    background:color-mix(in srgb,var(--paper) 90%,transparent);
+    backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);padding:11px 20px}
+  .bar .brand{font-family:var(--mono);font-size:12.5px;font-weight:700;
+    color:var(--muted);white-space:nowrap}
+  .bar .brand b{color:var(--ink)}
+  #prog{position:fixed;top:0;left:0;height:3px;width:0;
+    background:var(--brass);z-index:30;transition:width .1s}
+  #toggleAll{font-family:var(--mono);font-size:12px;font-weight:700;
+    cursor:pointer;background:var(--slate);color:#fff;border:0;
+    border-radius:7px;padding:7px 13px;white-space:nowrap}
+  #toggleAll:hover{filter:brightness(1.1)}
+
+  main{max-width:760px;margin:0 auto;padding:26px 20px 80px}
+  header.head{margin:6px 0 26px}
+  .badge{display:inline-block;font-family:var(--mono);font-size:12px;
+    font-weight:700;color:var(--brass);background:var(--chip);
+    border:1px solid var(--line);border-radius:999px;padding:4px 12px}
+  .setno{font-family:var(--mono);font-size:12.5px;color:var(--muted);
+    margin-left:9px}
+  header.head h1{font-size:23px;margin:14px 0 6px;letter-spacing:-.01em}
+  header.head p{margin:0;color:var(--muted);font-size:14px}
+
+  .q,.oral{background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:19px 21px;margin:16px 0;
+    transition:border-color .15s,box-shadow .15s}
+  .qnum{font-family:var(--mono);font-size:11.5px;font-weight:700;
+    color:var(--brass);letter-spacing:.03em}
+  .qtype{font-family:var(--mono);font-size:11px;color:var(--muted);
+    margin-left:7px}
+  .qtext{margin:8px 0 0;font-size:16.5px;font-weight:600;line-height:1.5}
+
+  ol.choices{counter-reset:opt;list-style:none;margin:15px 0 0;padding:0}
+  ol.choices li{counter-increment:opt;position:relative;
+    padding:9px 13px 9px 42px;margin:6px 0;border-radius:8px;
+    font-size:15px;line-height:1.45}
+  ol.choices li::before{content:counter(opt);position:absolute;left:11px;
+    top:50%;transform:translateY(-50%);
+    width:21px;height:21px;border-radius:50%;
+    border:1.5px solid var(--muted);color:var(--muted);
+    font-family:var(--mono);font-size:12px;font-weight:700;
+    display:flex;align-items:center;justify-content:center}
+
+  details{margin-top:14px;border-top:1px dashed var(--line);padding-top:2px}
+  details summary{cursor:pointer;list-style:none;
+    font-family:var(--mono);font-size:12.5px;font-weight:700;
+    color:var(--brass);padding:10px 0 4px}
+  details summary::-webkit-details-marker{display:none}
+  details summary::before{content:"▸ ";}
+  details[open] summary::before{content:"▾ ";}
+  .verdict{font-family:var(--mono);font-weight:700;color:var(--safe);
+    background:var(--safe-bg);border:1px solid var(--safe-line);
+    border-radius:8px;padding:8px 12px;margin:6px 0 0;font-size:14px}
+  .ans{margin:11px 0 2px;font-size:14.5px;line-height:1.68;color:var(--ink)}
+
+  footer.recap{margin:34px 0 0;background:var(--slate-bg);
+    border:1px solid var(--line);border-radius:13px;padding:18px 21px}
+  footer.recap h2{font-size:14px;font-family:var(--mono);
+    margin:0 0 10px;color:var(--slate)}
+  footer.recap ol{margin:0;padding-left:20px}
+  footer.recap li{font-size:14px;line-height:1.6;margin:5px 0}
+
+  /* ── 인터랙티브 채점 ── */
+  #score{font-family:var(--mono);font-size:11px;color:var(--muted);white-space:nowrap;text-align:right;line-height:1.4}
+  #score b{color:var(--ink)} #score .ok{color:var(--safe)} #score .no{color:var(--danger)}
+  ol.choices li.opt{cursor:pointer;border-radius:8px;transition:background .12s,box-shadow .12s;-webkit-tap-highlight-color:transparent}
+  ol.choices li.opt:hover{background:var(--chip)}
+  ol.choices li.sel{background:color-mix(in srgb,var(--brass) 15%,transparent)}
+  ol.choices li.sel::before{border-color:var(--brass);color:#fff;background:var(--brass)}
+  ol.choices li.correct{background:var(--safe-bg)}
+  ol.choices li.correct::before{content:"✓";border-color:var(--safe);color:#fff;background:var(--safe)}
+  ol.choices li.wrong{background:color-mix(in srgb,var(--danger) 13%,transparent)}
+  ol.choices li.wrong::before{content:"✕";border-color:var(--danger);color:#fff;background:var(--danger)}
+  .gradebar{display:flex;align-items:center;gap:11px;margin-top:13px}
+  .gradebar.nudge{animation:shake .32s}
+  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+  .gradebtn{font-family:var(--mono);font-size:12.5px;font-weight:700;cursor:pointer;
+    background:var(--slate);color:#fff;border:0;border-radius:7px;padding:7px 15px;white-space:nowrap}
+  .gradebtn:disabled{opacity:.4;cursor:not-allowed}
+  .gradebtn:not(:disabled):hover{filter:brightness(1.1)}
+  .result{font-family:var(--mono);font-size:13px;font-weight:700;display:inline-flex;align-items:center;gap:5px}
+  .result.ok{color:var(--safe)} .result.no{color:var(--danger)}
+  .q.graded.ok,.oral.graded.ok{border-color:var(--safe-line);box-shadow:0 0 0 1px var(--safe-line)}
+  .q.graded.no,.oral.graded.no{border-color:var(--danger);box-shadow:0 0 0 1px var(--danger)}
+  /* 서술형 타이핑 답안 */
+  .answerbox{display:block;width:100%;margin-top:13px;font-family:var(--sans);font-size:14.5px;line-height:1.65;
+    color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:9px;padding:10px 13px;
+    resize:vertical;min-height:66px}
+  .answerbox:focus{outline:2px solid color-mix(in srgb,var(--brass) 42%,transparent);outline-offset:1px;border-color:var(--brass)}
+  .answerbox::placeholder{color:var(--muted);opacity:.75}
+  .selflabel{font-family:var(--mono);font-size:12px;color:var(--muted)}
+  .selfbtn{font-family:var(--mono);font-size:12px;font-weight:700;cursor:pointer;border-radius:7px;
+    padding:6px 12px;border:1px solid var(--line);background:var(--card);color:var(--ink)}
+  .selfbtn.ok{border-color:var(--safe-line);color:var(--safe)} .selfbtn.ok:hover{background:var(--safe-bg)}
+  .selfbtn.no{border-color:var(--danger);color:var(--danger)} .selfbtn.no:hover{background:color-mix(in srgb,var(--danger) 8%,transparent)}
+  .selfbtn.pick{color:#fff}
+  .selfbtn.ok.pick{background:var(--safe);border-color:var(--safe)}
+  .selfbtn.no.pick{background:var(--danger);border-color:var(--danger)}
+</style>
+
+<div id="prog"></div>
+<div class="bar">
+  <span class="brand"><b>SQL</b> 드릴</span>
+  <button id="toggleAll" type="button">전체 정답 펼치기</button>
+</div>
+
+<main>
+  <header class="head">
+    <span class="badge">SQL</span><span class="setno">세트 2 / 5</span>
+    <h1>조인·집계 필터부터 제약조건·집합연산까지</h1>
+    <p>보기를 고른 뒤 <b>채점하기</b>를 누르면 정오답과 해설이 열립니다. 쿼리작성·단답은 직접 적어보고 모범답안과 비교해 스스로 채점하세요.</p>
+  </header>
+
+  <!-- Q11 -->
+  <section class="q">
+    <div><span class="qnum">Q11</span><span class="qtype">객관식 · LEFT JOIN</span></div>
+    <p class="qtext"><code>EMP LEFT JOIN DEPT ON e.dept_id = d.dept_id</code> 의 결과에 대한 설명으로 옳은 것은?</p>
+    <ol class="choices">
+      <li>양쪽 모두에 매칭되는 행만 나온다</li>
+      <li>부서 테이블의 모든 행이 기준이 된다</li>
+      <li>매칭 안 되면 그 사원은 제외된다</li>
+      <li>부서가 없는(dept_id가 NULL이거나 매칭 안 되는) 사원도 나오고, 그 부서 컬럼은 NULL로 채워진다</li>
+    </ol>
+    <details>
+      <summary>정답 확인</summary>
+      <div class="verdict">④ 부서가 없는 사원도 나오고, 그 부서 컬럼은 NULL로 채워진다</div>
+      <div class="ans">LEFT JOIN은 왼쪽(EMP) 전체를 보존하고 오른쪽에 짝이 없으면 NULL로 채운다. "주문이 없는 고객까지 포함한 명단" 같이 누락을 살려야 하는 SI 요구에 필수이며, INNER JOIN으로 짜면 대상이 조용히 빠진다.</div>
+    </details>
+  </section>
+
+  <!-- Q12 -->
+  <section class="q">
+    <div><span class="qnum">Q12</span><span class="qtype">객관식 · HAVING</span></div>
+    <p class="qtext">다음 쿼리의 결과로 옳은 것은? <code>SELECT dept_id, AVG(salary) FROM EMP GROUP BY dept_id HAVING AVG(salary) &gt;= 4000</code></p>
+    <ol class="choices">
+      <li>모든 부서의 평균 급여를 보여준다</li>
+      <li>평균 급여가 4000 이상인 부서만 보여준다</li>
+      <li>급여가 4000 이상인 개별 사원을 보여준다</li>
+      <li>문법 오류가 난다</li>
+    </ol>
+    <details>
+      <summary>정답 확인</summary>
+      <div class="verdict">② 평균 급여가 4000 이상인 부서만 보여준다</div>
+      <div class="ans">HAVING은 GROUP BY로 만든 그룹에 집계 조건을 걸어 그룹 단위로 걸러낸다. "평균 실적이 기준 이상인 팀만" 같은 SI 성과 리포트에 직결되며, 같은 조건을 WHERE에 쓰면 개별 사원 필터가 되어 의미가 달라진다.</div>
+    </details>
+  </section>
+
+  <!-- Q13 -->
+  <section class="q">
+    <div><span class="qnum">Q13</span><span class="qtype">객관식 · 제약조건 PK</span></div>
+    <p class="qtext">기본키(PRIMARY KEY) 제약에 대한 설명으로 옳은 것은?</p>
+    <ol class="choices">
+      <li>NULL을 허용하지만 중복은 불가하다</li>
+      <li>중복은 허용하지만 NULL은 불가하다</li>
+      <li>NULL과 중복 둘 다 허용한다</li>
+      <li>NULL 불가 + 유일성(중복 불가)을 동시에 보장한다</li>
+    </ol>
+    <details>
+      <summary>정답 확인</summary>
+      <div class="verdict">④ NULL 불가 + 유일성(중복 불가)을 동시에 보장한다</div>
+      <div class="ans">PK는 UNIQUE와 NOT NULL을 합친 것으로 행을 유일하게 식별한다. SI에서 회원ID·주문번호 등 식별자에 걸며, PK가 없으면 중복 데이터·부정확한 조인으로 유지보수 시 원인 추적이 매우 어려워진다.</div>
+    </details>
+  </section>
+
+  <!-- Q14 -->
+  <section class="q">
+    <div><span class="qnum">Q14</span><span class="qtype">객관식 · NVL/COALESCE</span></div>
+    <p class="qtext"><code>NVL(comm, 0)</code> (오라클)의 동작으로 옳은 것은?</p>
+    <ol class="choices">
+      <li>comm이 NULL이면 0으로 바꾸고, 아니면 comm 값을 그대로 쓴다</li>
+      <li>comm이 0이면 NULL로 바꾼다</li>
+      <li>comm을 무조건 0으로 만든다</li>
+      <li>comm이 NULL이면 오류를 낸다</li>
+    </ol>
+    <details>
+      <summary>정답 확인</summary>
+      <div class="verdict">① comm이 NULL이면 0으로 바꾸고, 아니면 comm 값을 그대로 쓴다</div>
+      <div class="ans"><code>NVL(값, 대체값)</code>은 첫 인자가 NULL일 때만 대체값을 반환한다(표준 SQL은 <code>COALESCE</code>). SI 통계에서 미입력 항목을 0이나 '미정'으로 채워 합계·화면 표시를 안정화하는 데 필수적인 함수다.</div>
+    </details>
+  </section>
+
+  <!-- Q15 -->
+  <section class="q">
+    <div><span class="qnum">Q15</span><span class="qtype">객관식 · UNION vs UNION ALL</span></div>
+    <p class="qtext"><code>UNION</code>과 <code>UNION ALL</code>의 차이로 옳은 것은?</p>
+    <ol class="choices">
+      <li>UNION은 중복을 제거하고, UNION ALL은 중복을 그대로 둔다</li>
+      <li>UNION ALL이 항상 중복을 제거한다</li>
+      <li>둘 다 중복을 제거하지만 정렬만 다르다</li>
+      <li>UNION은 컬럼 개수가 달라도 된다</li>
+    </ol>
+    <details>
+      <summary>정답 확인</summary>
+      <div class="verdict">① UNION은 중복을 제거하고, UNION ALL은 중복을 그대로 둔다</div>
+      <div class="ans">UNION은 정렬·중복제거 과정이 있어 느리고, UNION ALL은 그냥 이어붙여 빠르다. 중복이 없음을 아는 데이터(예: 월별로 나뉜 로그 통합)라면 SI에서 성능을 위해 UNION ALL을 선택하는 것이 정석이다.</div>
+    </details>
+  </section>
+
+  <!-- Q16 -->
+  <section class="q">
+    <div><span class="qnum">Q16</span><span class="qtype">객관식 · CASE WHEN</span></div>
+    <p class="qtext">다음 표현의 결과로 옳은 것은? <code>CASE WHEN salary &gt;= 5000 THEN 'A' WHEN salary &gt;= 3000 THEN 'B' ELSE 'C' END</code> (salary가 3500일 때)</p>
+    <ol class="choices">
+      <li>'A'</li>
+      <li>'C'</li>
+      <li>'B'</li>
+      <li>NULL</li>
+    </ol>
+    <details>
+      <summary>정답 확인</summary>
+      <div class="verdict">③ 'B'</div>
+      <div class="ans">CASE는 위에서부터 첫 번째로 참인 WHEN을 골라 멈춘다. 3500은 5000 미만이라 첫 조건은 거짓, 3000 이상이라 'B'다. SI 리포트에서 점수·금액을 등급/구간으로 변환할 때 조건 순서를 큰 값부터 배치하는 것이 핵심이다.</div>
+    </details>
+  </section>
+
+  <!-- Q17 -->
+  <section class="q">
+    <div><span class="qnum">Q17</span><span class="qtype">쿼리작성 · LEFT JOIN + NULL</span></div>
+    <p class="qtext">아래 스키마에서 요구사항을 만족하는 SQL을 작성하라.<br>스키마: <code>CUSTOMER(cust_id, name)</code>, <code>ORDERS(order_id, cust_id, amount)</code><br>요구사항: 아직 주문 이력이 한 건도 없는 고객의 name을 조회하라.</p>
+    <details>
+      <summary>모범답안 확인</summary>
+      <div class="verdict">모범답안</div>
+      <pre><code>SELECT c.name
+FROM   CUSTOMER c
+LEFT   JOIN ORDERS o ON c.cust_id = o.cust_id
+WHERE  o.order_id IS NULL;</code></pre>
+      <div class="ans">LEFT JOIN으로 고객 전체를 살린 뒤 오른쪽이 NULL인 행만 남기면 "매칭 실패=주문 없음" 고객이 걸러진다. 휴면·미거래 대상 추출은 SI 마케팅/정산 요건에 자주 나오는 안티조인 패턴이다.</div>
+    </details>
+  </section>
+
+  <!-- Q18 -->
+  <section class="q">
+    <div><span class="qnum">Q18</span><span class="qtype">쿼리작성 · HAVING</span></div>
+    <p class="qtext">아래 스키마에서 요구사항을 만족하는 SQL을 작성하라.<br>스키마: <code>ORDERS(order_id, cust_id, amount)</code><br>요구사항: 고객(cust_id)별 총 주문금액이 100000 이상인 고객의 cust_id와 총액(total_amt)을 조회하라.</p>
+    <details>
+      <summary>모범답안 확인</summary>
+      <div class="verdict">모범답안</div>
+      <pre><code>SELECT cust_id, SUM(amount) AS total_amt
+FROM   ORDERS
+GROUP  BY cust_id
+HAVING SUM(amount) &gt;= 100000;</code></pre>
+      <div class="ans">그룹별 합계 조건은 WHERE가 아니라 HAVING에 SUM으로 건다. "우수 거래처 선별" 같은 SI 요구의 전형으로, GROUP BY와 HAVING의 역할 분리를 정확히 이해했는지가 채점 포인트다.</div>
+    </details>
+  </section>
+
+  <!-- Q19 -->
+  <section class="q">
+    <div><span class="qnum">Q19</span><span class="qtype">쿼리작성 · UPDATE</span></div>
+    <p class="qtext">아래 스키마에서 요구사항을 만족하는 SQL을 작성하라.<br>스키마: <code>EMP(emp_id, name, dept_id, salary)</code><br>요구사항: dept_id가 20인 사원의 salary를 10% 인상하라.</p>
+    <details>
+      <summary>모범답안 확인</summary>
+      <div class="verdict">모범답안</div>
+      <pre><code>UPDATE EMP
+SET    salary = salary * 1.1
+WHERE  dept_id = 20;</code></pre>
+      <div class="ans">UPDATE에서 WHERE를 빠뜨리면 전체 행이 갱신되는 대형 사고가 난다. SI 운영 반영 작업 전 항상 같은 조건의 SELECT로 대상 건수를 먼저 확인하고, 트랜잭션 안에서 실행 후 커밋하는 것이 안전 관행이다.</div>
+    </details>
+  </section>
+
+  <!-- Q20 -->
+  <section class="q">
+    <div><span class="qnum">Q20</span><span class="qtype">단답 · UNION ALL</span></div>
+    <p class="qtext">A 테이블에 4행, B 테이블에 3행이 있고 두 결과에 중복이 2건 있다. <code>SELECT ... FROM A UNION ALL SELECT ... FROM B</code> 의 결과 행수는 몇 행인가? 숫자로 답하라.</p>
+    <details>
+      <summary>모범답안 확인</summary>
+      <div class="verdict">모범답안 · 7</div>
+      <div class="ans">UNION ALL은 중복을 제거하지 않고 그대로 이어붙이므로 4+3=7행이다(같은 조건에서 UNION이면 중복 2건이 합쳐져 5행). 로그·이력 통합 시 건수가 맞지 않으면 이 중복제거 여부를 먼저 의심한다.</div>
+    </details>
+  </section>
+
+  <footer class="recap">
+    <h2>이 세트 우선복습 3줄</h2>
+    <ol>
+      <li><b>LEFT JOIN + IS NULL = 안티조인</b> — 왼쪽 전체를 살린 뒤 <code>o.order_id IS NULL</code>로 "매칭 실패=주문 없음" 고객을 뽑는다. INNER JOIN으로 짜면 대상이 조용히 빠진다.</li>
+      <li><b>집계 조건은 WHERE가 아니라 HAVING</b> — <code>HAVING SUM(amount) &gt;= 100000</code>처럼 GROUP BY 후 그룹 단위로 거른다. 같은 조건을 WHERE에 쓰면 개별 행 필터가 되어 의미가 달라진다.</li>
+      <li><b>UNION vs UNION ALL</b> — UNION은 중복 제거(정렬 비용) , UNION ALL은 그대로 이어붙여 빠르다. 4행+3행 = UNION ALL은 7행, UNION은 중복 2건 합쳐 5행.</li>
+    </ol>
+  </footer>
+</main>
+
+<script>
+  (function(){
+    /* 스크롤 진행바 */
+    var prog=document.getElementById('prog');
+    var doc=document.documentElement;
+    function onScroll(){
+      var pct=doc.scrollTop/(doc.scrollHeight-doc.clientHeight)*100;
+      prog.style.width=(pct||0)+'%';
+    }
+    document.addEventListener('scroll',onScroll,{passive:true}); onScroll();
+
+    /* 전체 정답 펼치기 */
+    var btn=document.getElementById('toggleAll'), open=false;
+    btn.addEventListener('click',function(){
+      open=!open;
+      document.querySelectorAll('details').forEach(function(d){d.open=open;});
+      btn.textContent=open?'전체 정답 접기':'전체 정답 펼치기';
+    });
+
+    /* ── 채점 상태/점수판 ── 정답은 .verdict 앞머리의 원문자(①②③④)에서 자동 추출 ── */
+    var CIRC='①②③④⑤⑥⑦⑧⑨⑩';
+    var state=[];   // 문항별 채점 결과: true(정답)/false(오답)/null(미채점)
+    var scoreEl;
+    function renderScore(){
+      var total=state.length;
+      var done=state.filter(function(s){return s!==null;}).length;
+      var correct=state.filter(function(s){return s===true;}).length;
+      scoreEl.innerHTML='채점 <b>'+done+'/'+total+'</b>'
+        +'<br>정답 <span class="ok">'+correct+'</span> · 오답 <span class="no">'+(done-correct)+'</span>';
+    }
+    function buildScore(){
+      scoreEl=document.createElement('div'); scoreEl.id='score';
+      var right=document.createElement('div');
+      right.style.cssText='display:flex;align-items:center;gap:12px';
+      var barEl=document.querySelector('.bar');
+      barEl.appendChild(right);
+      right.appendChild(scoreEl); right.appendChild(btn); // 점수판 + 기존 버튼을 우측 묶음으로
+      renderScore();
+    }
+
+    /* ── 객관식: 보기 클릭 → 채점하기 ── */
+    function setupMC(q,det,choices,ci){
+      var lis=Array.prototype.slice.call(choices.querySelectorAll('li'));
+      if(ci>=lis.length) return;
+      var idx=state.length; state.push(null);
+      var bar=document.createElement('div'); bar.className='gradebar';
+      var gbtn=document.createElement('button'); gbtn.type='button'; gbtn.className='gradebtn';
+      gbtn.textContent='채점하기'; gbtn.disabled=true;
+      var res=document.createElement('span'); res.className='result';
+      bar.appendChild(gbtn); bar.appendChild(res);
+      det.parentNode.insertBefore(bar, det);
+      lis.forEach(function(li){
+        li.classList.add('opt');
+        li.addEventListener('click',function(){
+          if(q.classList.contains('graded')) return; // 채점 후엔 잠금
+          lis.forEach(function(x){x.classList.remove('sel');});
+          li.classList.add('sel'); gbtn.disabled=false;
+        });
+      });
+      function reset(){
+        lis.forEach(function(x){x.classList.remove('sel','correct','wrong');});
+        q.classList.remove('graded','ok','no');
+        det.open=false; res.textContent=''; res.className='result';
+        gbtn.textContent='채점하기'; gbtn.disabled=true;
+        state[idx]=null; renderScore();
+      }
+      function grade(){
+        var sel=choices.querySelector('li.sel');
+        if(!sel){ bar.classList.add('nudge'); setTimeout(function(){bar.classList.remove('nudge');},350); return; }
+        var ok=lis.indexOf(sel)===ci;
+        lis[ci].classList.add('correct');
+        if(!ok) sel.classList.add('wrong');
+        q.classList.add('graded', ok?'ok':'no');
+        det.open=true;                                // 정답보기 토글 자동 오픈
+        res.textContent=ok?'✓ 정답':'✕ 오답'; res.className='result '+(ok?'ok':'no');
+        gbtn.textContent='다시 풀기';
+        state[idx]=ok; renderScore();
+      }
+      gbtn.addEventListener('click',function(){
+        q.classList.contains('graded')?reset():grade();
+      });
+    }
+
+    /* ── 서술형/구두: 타이핑 답안 → 모범답안 확인 → 스스로 채점(O/X) ── */
+    function setupText(q,det,ph,label){
+      ph=ph||'여기에 내 답안을 적어보고 모범답안과 비교하세요…';
+      label=label||'모범답안 확인';
+      var idx=state.length; state.push(null);
+      var ta=document.createElement('textarea'); ta.className='answerbox'; ta.rows=3;
+      ta.placeholder=ph;
+      det.parentNode.insertBefore(ta, det);
+      var bar=document.createElement('div'); bar.className='gradebar';
+      det.parentNode.insertBefore(bar, det);
+      function toInitial(){
+        bar.innerHTML='';
+        var gbtn=document.createElement('button'); gbtn.type='button'; gbtn.className='gradebtn';
+        gbtn.textContent=label;
+        gbtn.addEventListener('click',function(){ det.open=true; toSelf(); }); // 모범답안 자동 오픈
+        bar.appendChild(gbtn);
+      }
+      function toSelf(){
+        bar.innerHTML='';
+        var lab=document.createElement('span'); lab.className='selflabel'; lab.textContent='스스로 채점:';
+        var okB=document.createElement('button'); okB.type='button'; okB.className='selfbtn ok'; okB.textContent='✓ 맞았음';
+        var noB=document.createElement('button'); noB.type='button'; noB.className='selfbtn no'; noB.textContent='✕ 아쉬웠음';
+        var again=document.createElement('button'); again.type='button'; again.className='gradebtn'; again.textContent='다시';
+        again.style.marginLeft='4px';
+        [lab,okB,noB,again].forEach(function(el){bar.appendChild(el);});
+        function mark(ok){
+          state[idx]=ok; q.classList.add('graded'); q.classList.toggle('ok',ok); q.classList.toggle('no',!ok);
+          okB.classList.toggle('pick',ok); noB.classList.toggle('pick',!ok); renderScore();
+        }
+        okB.addEventListener('click',function(){mark(true);});
+        noB.addEventListener('click',function(){mark(false);});
+        again.addEventListener('click',function(){
+          det.open=false; q.classList.remove('graded','ok','no'); state[idx]=null; renderScore(); toInitial();
+        });
+      }
+      toInitial();
+    }
+
+    document.querySelectorAll('.q').forEach(function(q){
+      var det=q.querySelector('details');
+      if(!det) return;                                 // 정답/해설 토글이 있는 문항만
+      var choices=q.querySelector('ol.choices');
+      var verdict=q.querySelector('.verdict');
+      var ci=verdict?CIRC.indexOf(verdict.textContent.trim().charAt(0)):-1;
+      if(choices){ if(ci>=0) setupMC(q,det,choices,ci); } // 객관식(정답 키 있을 때만)
+      else setupText(q,det);                             // 서술형/단답/쿼리작성
+    });
+
+    document.querySelectorAll('.oral').forEach(function(o){    // 구두질문
+      var det=o.querySelector('details');
+      if(!det) return;
+      setupText(o,det,'여기에 내 답변을 소리 내어 말하듯 적어보고 모범답변과 비교하세요…','모범답변 확인');
+    });
+
+    buildScore();
+  })();
+</script>

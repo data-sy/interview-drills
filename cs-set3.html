@@ -1,0 +1,457 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>기초 CS · 세트 3 — 자가채점 드릴</title>
+<style>
+  :root{
+    --card:#fffdf7; --line:#e7ddca; --ink:#2f2a22; --muted:#8a7f6c;
+    --brass:#b07d34; --danger:#c0392b;
+    --safe:#3f8f5f; --safe-bg:#eef7f0; --safe-line:#bcdcc6;
+    --slate:#4a5568; --slate-bg:#eef1f5; --chip:#f3ecdd;
+    --mono:ui-monospace,SFMono-Regular,Menlo,"Cascadia Mono","Roboto Mono",monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI","Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+    --paper:#f6f0e3;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --card:#232019; --line:#3b3529; --ink:#ece5d6; --muted:#9a8f7c;
+      --brass:#d3a05a; --danger:#e07a6e;
+      --safe:#7fc79a; --safe-bg:#1d2a22; --safe-line:#2f5340;
+      --slate:#aeb7c4; --slate-bg:#262b33; --chip:#2c2820;
+      --paper:#1a1712;
+    }
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--paper);color:var(--ink);
+    font-family:var(--sans);font-size:16px;line-height:1.6;
+    -webkit-font-smoothing:antialiased}
+  code{font-family:var(--mono);font-size:.9em;background:var(--chip);
+    padding:.1em .38em;border-radius:5px}
+  pre{margin:13px 0 0;background:var(--chip);border:1px solid var(--line);
+    border-radius:9px;padding:13px 15px;overflow-x:auto}
+  pre code{background:none;padding:0;font-size:13px;line-height:1.55;display:block}
+
+  /* 상단 바 + 진행바 */
+  .bar{position:sticky;top:0;z-index:20;display:flex;align-items:center;
+    gap:12px;flex-wrap:wrap;
+    background:color-mix(in srgb,var(--paper) 90%,transparent);
+    backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);padding:11px 20px}
+  .bar .brand{font-family:var(--mono);font-size:12.5px;font-weight:700;
+    color:var(--muted);white-space:nowrap}
+  .bar .brand b{color:var(--ink)}
+  #prog{position:fixed;top:0;left:0;height:3px;width:0;
+    background:var(--brass);z-index:30;transition:width .1s}
+  #toggleAll{font-family:var(--mono);font-size:12px;font-weight:700;
+    cursor:pointer;background:var(--slate);color:#fff;border:0;
+    border-radius:7px;padding:7px 13px;white-space:nowrap}
+  #toggleAll:hover{filter:brightness(1.1)}
+
+  main{max-width:760px;margin:0 auto;padding:26px 20px 80px}
+  header.head{margin:6px 0 26px}
+  .badge{display:inline-block;font-family:var(--mono);font-size:12px;
+    font-weight:700;color:var(--brass);background:var(--chip);
+    border:1px solid var(--line);border-radius:999px;padding:4px 12px}
+  .setno{font-family:var(--mono);font-size:12.5px;color:var(--muted);
+    margin-left:9px}
+  header.head h1{font-size:23px;margin:14px 0 6px;letter-spacing:-.01em}
+  header.head p{margin:0;color:var(--muted);font-size:14px}
+
+  .q,.oral{background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:19px 21px;margin:16px 0;
+    transition:border-color .15s,box-shadow .15s}
+  .qnum{font-family:var(--mono);font-size:11.5px;font-weight:700;
+    color:var(--brass);letter-spacing:.03em}
+  .qtype{font-family:var(--mono);font-size:11px;color:var(--muted);
+    margin-left:7px}
+  .qtext{margin:8px 0 0;font-size:16.5px;font-weight:600;line-height:1.5}
+
+  ol.choices{counter-reset:opt;list-style:none;margin:15px 0 0;padding:0}
+  ol.choices li{counter-increment:opt;position:relative;
+    padding:9px 13px 9px 42px;margin:6px 0;border-radius:8px;
+    font-size:15px;line-height:1.45}
+  ol.choices li::before{content:counter(opt);position:absolute;left:11px;
+    top:50%;transform:translateY(-50%);
+    width:21px;height:21px;border-radius:50%;
+    border:1.5px solid var(--muted);color:var(--muted);
+    font-family:var(--mono);font-size:12px;font-weight:700;
+    display:flex;align-items:center;justify-content:center}
+
+  details{margin-top:14px;border-top:1px dashed var(--line);padding-top:2px}
+  details summary{cursor:pointer;list-style:none;
+    font-family:var(--mono);font-size:12.5px;font-weight:700;
+    color:var(--brass);padding:10px 0 4px}
+  details summary::-webkit-details-marker{display:none}
+  details summary::before{content:"▸ ";}
+  details[open] summary::before{content:"▾ ";}
+  .verdict{font-family:var(--mono);font-weight:700;color:var(--safe);
+    background:var(--safe-bg);border:1px solid var(--safe-line);
+    border-radius:8px;padding:8px 12px;margin:6px 0 0;font-size:14px}
+  .ans{margin:11px 0 2px;font-size:14.5px;line-height:1.68;color:var(--ink)}
+
+  footer.recap{margin:34px 0 0;background:var(--slate-bg);
+    border:1px solid var(--line);border-radius:13px;padding:18px 21px}
+  footer.recap h2{font-size:14px;font-family:var(--mono);
+    margin:0 0 10px;color:var(--slate)}
+  footer.recap ol{margin:0;padding-left:20px}
+  footer.recap li{font-size:14px;line-height:1.6;margin:5px 0}
+
+  /* ── 인터랙티브 채점 ── */
+  #score{font-family:var(--mono);font-size:11px;color:var(--muted);white-space:nowrap;text-align:right;line-height:1.4}
+  #score b{color:var(--ink)} #score .ok{color:var(--safe)} #score .no{color:var(--danger)}
+  ol.choices li.opt{cursor:pointer;border-radius:8px;transition:background .12s,box-shadow .12s;-webkit-tap-highlight-color:transparent}
+  ol.choices li.opt:hover{background:var(--chip)}
+  ol.choices li.sel{background:color-mix(in srgb,var(--brass) 15%,transparent)}
+  ol.choices li.sel::before{border-color:var(--brass);color:#fff;background:var(--brass)}
+  ol.choices li.correct{background:var(--safe-bg)}
+  ol.choices li.correct::before{content:"✓";border-color:var(--safe);color:#fff;background:var(--safe)}
+  ol.choices li.wrong{background:color-mix(in srgb,var(--danger) 13%,transparent)}
+  ol.choices li.wrong::before{content:"✕";border-color:var(--danger);color:#fff;background:var(--danger)}
+  .gradebar{display:flex;align-items:center;gap:11px;margin-top:13px}
+  .gradebar.nudge{animation:shake .32s}
+  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+  .gradebtn{font-family:var(--mono);font-size:12.5px;font-weight:700;cursor:pointer;
+    background:var(--slate);color:#fff;border:0;border-radius:7px;padding:7px 15px;white-space:nowrap}
+  .gradebtn:disabled{opacity:.4;cursor:not-allowed}
+  .gradebtn:not(:disabled):hover{filter:brightness(1.1)}
+  .result{font-family:var(--mono);font-size:13px;font-weight:700;display:inline-flex;align-items:center;gap:5px}
+  .result.ok{color:var(--safe)} .result.no{color:var(--danger)}
+  .q.graded.ok,.oral.graded.ok{border-color:var(--safe-line);box-shadow:0 0 0 1px var(--safe-line)}
+  .q.graded.no,.oral.graded.no{border-color:var(--danger);box-shadow:0 0 0 1px var(--danger)}
+  /* 서술형 타이핑 답안 */
+  .answerbox{display:block;width:100%;margin-top:13px;font-family:var(--sans);font-size:14.5px;line-height:1.65;
+    color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:9px;padding:10px 13px;
+    resize:vertical;min-height:66px}
+  .answerbox:focus{outline:2px solid color-mix(in srgb,var(--brass) 42%,transparent);outline-offset:1px;border-color:var(--brass)}
+  .answerbox::placeholder{color:var(--muted);opacity:.75}
+  .selflabel{font-family:var(--mono);font-size:12px;color:var(--muted)}
+  .selfbtn{font-family:var(--mono);font-size:12px;font-weight:700;cursor:pointer;border-radius:7px;
+    padding:6px 12px;border:1px solid var(--line);background:var(--card);color:var(--ink)}
+  .selfbtn.ok{border-color:var(--safe-line);color:var(--safe)} .selfbtn.ok:hover{background:var(--safe-bg)}
+  .selfbtn.no{border-color:var(--danger);color:var(--danger)} .selfbtn.no:hover{background:color-mix(in srgb,var(--danger) 8%,transparent)}
+  .selfbtn.pick{color:#fff}
+  .selfbtn.ok.pick{background:var(--safe);border-color:var(--safe)}
+  .selfbtn.no.pick{background:var(--danger);border-color:var(--danger)}
+</style>
+
+<div id="prog"></div>
+<div class="bar">
+  <span class="brand"><b>기초 CS</b> 드릴</span>
+  <button id="toggleAll" type="button">전체 정답 펼치기</button>
+</div>
+
+<main>
+  <header class="head">
+    <span class="badge">기초 CS</span><span class="setno">세트 3 / 5</span>
+    <h1>트리·정렬·메모리부터 인덱스·해시·GC까지</h1>
+    <p>보기를 고른 뒤 <b>채점하기</b>를 누르면 정오답과 해설이 열립니다. 서술·단답은 직접 적어보고 모범답안과 비교해 스스로 채점하세요.</p>
+  </header>
+
+  <!-- Q21 -->
+  <section class="q">
+    <div><span class="qnum">Q21</span><span class="qtype">객관식 · 트리(이진트리)</span></div>
+    <p class="qtext">노드가 최대 2개의 자식을 갖는 트리 구조의 이름은?</p>
+    <ol class="choices">
+      <li>그래프(Graph)</li>
+      <li>이진 트리(Binary Tree)</li>
+      <li>연결리스트(Linked List)</li>
+      <li>해시테이블(Hash Table)</li>
+    </ol>
+    <details>
+      <summary>정답 확인</summary>
+      <div class="verdict">② 이진 트리(Binary Tree)</div>
+      <div class="ans">이진 트리는 각 노드가 최대 2개(왼쪽·오른쪽)의 자식을 가지며, 탐색·정렬·인덱스 구현의 기반이 된다. 특히 균형 이진 탐색 트리는 O(log n) 탐색을 제공한다. SI에서 조직도·카테고리 계층 같은 트리형 데이터를 표현·순회할 때 쓰인다.</div>
+    </details>
+  </section>
+
+  <!-- Q22 -->
+  <section class="q">
+    <div><span class="qnum">Q22</span><span class="qtype">객관식 · 정렬 복잡도 비교</span></div>
+    <p class="qtext">다음 정렬 알고리즘 중 평균 시간복잡도가 O(n log n)이 <em>아닌</em> 것은?</p>
+    <ol class="choices">
+      <li>병합 정렬(Merge Sort)</li>
+      <li>퀵 정렬(Quick Sort)</li>
+      <li>힙 정렬(Heap Sort)</li>
+      <li>삽입 정렬(Insertion Sort)</li>
+    </ol>
+    <details>
+      <summary>정답 확인</summary>
+      <div class="verdict">④ 삽입 정렬(Insertion Sort)</div>
+      <div class="ans">삽입 정렬은 평균/최악 O(n²)이고(거의 정렬된 데이터엔 빠름), 병합·퀵·힙 정렬은 평균 O(n log n)이다. SI에서 대량 데이터를 애플리케이션에서 직접 정렬해야 한다면 O(n log n) 계열을 쓰거나 DB 정렬에 위임하는 것이 성능상 유리하다.</div>
+    </details>
+  </section>
+
+  <!-- Q23 -->
+  <section class="q">
+    <div><span class="qnum">Q23</span><span class="qtype">객관식 · 메모리(스택/힙)</span></div>
+    <p class="qtext">프로그램 실행 시 메모리 영역에 대한 설명으로 옳은 것은?</p>
+    <ol class="choices">
+      <li>지역 변수와 함수 호출 정보는 힙(Heap) 영역에 저장된다</li>
+      <li>동적 할당된 객체는 스택(Stack) 영역에 저장된다</li>
+      <li>스택은 함수 호출과 함께 자동으로 할당·해제된다</li>
+      <li>힙 영역은 스택보다 항상 접근 속도가 빠르다</li>
+    </ol>
+    <details>
+      <summary>정답 확인</summary>
+      <div class="verdict">③ 스택은 함수 호출과 함께 자동으로 할당·해제된다</div>
+      <div class="ans">스택은 지역 변수·호출 프레임을 담고 함수 진입/종료에 맞춰 자동 관리되며, 동적 할당 객체는 힙에 저장되어 GC나 명시적 해제로 정리된다. SI 자바 애플리케이션에서 메모리 누수는 대개 힙에 참조가 남아 GC가 못 지우는 상황이라 힙/스택 구분이 진단의 기초다.</div>
+    </details>
+  </section>
+
+  <!-- Q24 -->
+  <section class="q">
+    <div><span class="qnum">Q24</span><span class="qtype">객관식 · TCP/IP 4계층</span></div>
+    <p class="qtext">TCP/IP 4계층 모델에서 HTTP, FTP, DNS 같은 프로토콜이 속하는 계층은?</p>
+    <ol class="choices">
+      <li>네트워크 인터페이스 계층</li>
+      <li>인터넷 계층</li>
+      <li>전송 계층</li>
+      <li>응용(Application) 계층</li>
+    </ol>
+    <details>
+      <summary>정답 확인</summary>
+      <div class="verdict">④ 응용(Application) 계층</div>
+      <div class="ans">TCP/IP 4계층(응용·전송·인터넷·네트워크 인터페이스)에서 HTTP/FTP/DNS 같은 응용 서비스 프로토콜은 최상위 응용 계층에 속한다. TCP/UDP는 전송, IP는 인터넷 계층이다. 고객사 연계 프로토콜을 설계할 때 각 계층의 역할 구분이 통신 규격 협의의 기준이 된다.</div>
+    </details>
+  </section>
+
+  <!-- Q25 -->
+  <section class="q">
+    <div><span class="qnum">Q25</span><span class="qtype">객관식 · 인덱스 B-tree</span></div>
+    <p class="qtext">관계형 DB 인덱스가 주로 B-tree(B+tree) 구조를 사용하는 이유로 옳은 것은?</p>
+    <ol class="choices">
+      <li>데이터를 정렬 없이 무작위로 저장하기 위해</li>
+      <li>디스크 용량을 전혀 사용하지 않기 위해</li>
+      <li>범위 검색과 정렬된 탐색을 O(log n)으로 효율화하기 위해</li>
+      <li>삽입·삭제 시 재구성이 전혀 필요 없기 때문에</li>
+    </ol>
+    <details>
+      <summary>정답 확인</summary>
+      <div class="verdict">③ 범위 검색과 정렬된 탐색을 O(log n)으로 효율화하기 위해</div>
+      <div class="ans">B-tree 계열은 균형 트리라 탐색·삽입·삭제가 O(log n)이고, 정렬된 구조라 범위 검색(BETWEEN, 부등호)에 강하다. SI에서 조회 조건 컬럼에 인덱스를 걸어 대량 테이블의 WHERE·ORDER BY 성능을 확보하는 것이 튜닝의 핵심이다.</div>
+    </details>
+  </section>
+
+  <!-- Q26 -->
+  <section class="q">
+    <div><span class="qnum">Q26</span><span class="qtype">객관식 · 해시테이블</span></div>
+    <p class="qtext">해시테이블에서 서로 다른 키가 같은 해시값(버킷)을 갖는 현상과 그 해결책을 옳게 짝지은 것은?</p>
+    <ol class="choices">
+      <li>오버플로 - 정규화</li>
+      <li>충돌(Collision) - 체이닝/개방 주소법</li>
+      <li>언더플로 - 인덱싱</li>
+      <li>해시 미스 - 정렬</li>
+    </ol>
+    <details>
+      <summary>정답 확인</summary>
+      <div class="verdict">② 충돌(Collision) - 체이닝/개방 주소법</div>
+      <div class="ans">서로 다른 키가 같은 버킷에 매핑되는 것을 충돌이라 하며, 연결리스트로 잇는 체이닝이나 다른 빈 칸을 찾는 개방 주소법으로 해결한다. 충돌이 적으면 평균 O(1) 검색이 가능하다. SI에서 세션·캐시 저장소 키 설계 시 충돌을 줄이는 해시 분산이 성능에 영향을 준다.</div>
+    </details>
+  </section>
+
+  <!-- Q27 -->
+  <section class="q">
+    <div><span class="qnum">Q27</span><span class="qtype">객관식 · 비트연산</span></div>
+    <p class="qtext">정수 연산에서 <code>5 &amp; 3</code>(비트 AND)의 결과는? (5=101₂, 3=011₂)</p>
+    <ol class="choices">
+      <li>1</li>
+      <li>3</li>
+      <li>7</li>
+      <li>8</li>
+    </ol>
+    <details>
+      <summary>정답 확인</summary>
+      <div class="verdict">① 1</div>
+      <div class="ans">비트 AND는 두 비트가 모두 1일 때만 1이므로 101 &amp; 011 = 001 = 1이다. AND/OR/XOR/시프트는 플래그·마스킹에 쓰인다. SI에서 사용자 권한을 비트 플래그로 묶어 관리하고 <code>권한 &amp; 특정권한</code>으로 보유 여부를 빠르게 검사하는 패턴이 자주 등장한다.</div>
+    </details>
+  </section>
+
+  <!-- Q28 -->
+  <section class="q">
+    <div><span class="qnum">Q28</span><span class="qtype">객관식 · GC(가비지컬렉션)</span></div>
+    <p class="qtext">자바 등에서 가비지 컬렉션(Garbage Collection)에 대한 설명으로 옳은 것은?</p>
+    <ol class="choices">
+      <li>더 이상 참조되지 않는 힙 객체의 메모리를 자동으로 회수한다</li>
+      <li>스택 영역의 지역 변수를 개발자가 수동으로 해제하는 기법이다</li>
+      <li>GC가 동작하는 동안 성능 영향이 전혀 없다</li>
+      <li>참조가 남아 있어도 오래된 객체는 무조건 회수한다</li>
+    </ol>
+    <details>
+      <summary>정답 확인</summary>
+      <div class="verdict">① 더 이상 참조되지 않는 힙 객체의 메모리를 자동으로 회수한다</div>
+      <div class="ans">GC는 도달 불가능(참조 끊긴) 힙 객체를 찾아 자동 회수해 메모리 누수를 줄인다. 다만 GC 수행 중 일시 정지(stop-the-world) 등 성능 영향이 있고, 참조가 남으면 회수되지 않는다. SI 장기 구동 서버에서 불필요한 참조를 안 끊어 힙이 차오르는 누수가 대표 장애 원인이다.</div>
+    </details>
+  </section>
+
+  <!-- Q29 -->
+  <section class="q">
+    <div><span class="qnum">Q29</span><span class="qtype">단답 · 덱(Deque)</span></div>
+    <p class="qtext">양쪽 끝(앞·뒤) 모두에서 삽입과 삭제가 가능한 자료구조의 이름을 쓰시오.</p>
+    <details>
+      <summary>모범답안 확인</summary>
+      <div class="verdict">모범답안 · 덱(Deque, Double-Ended Queue)</div>
+      <div class="ans">덱은 큐와 스택의 동작을 모두 포함해 양쪽에서 넣고 뺄 수 있는 자료구조다. 앞뒤 삽입/삭제가 자유로워 슬라이딩 윈도우, 최근 항목 관리 등에 쓰인다. SI에서 최근 조회 목록처럼 앞은 최신 추가·뒤는 오래된 것 제거가 필요한 캐시 구현에 유용하다.</div>
+    </details>
+  </section>
+
+  <!-- Q30 -->
+  <section class="q">
+    <div><span class="qnum">Q30</span><span class="qtype">서술형 · DNS</span></div>
+    <p class="qtext">DNS(Domain Name System)의 역할을 설명하고, 사용자가 브라우저에 도메인을 입력했을 때 DNS가 어떤 변환을 수행하는지 서술하시오.</p>
+    <details>
+      <summary>모범답안 확인</summary>
+      <div class="verdict">모범답안</div>
+      <div class="ans">DNS는 사람이 읽기 쉬운 도메인 이름(예: www.example.com)을 컴퓨터가 통신에 사용하는 IP 주소(예: 93.184.216.34)로 변환해주는 시스템이다. 사용자가 도메인을 입력하면 브라우저는 DNS 서버(로컬 캐시→리졸버→루트/TLD/권한 서버 순)에 질의해 해당 도메인의 IP를 받아온 뒤, 그 IP로 실제 서버에 접속한다.<br><br>채점 포인트는 "도메인↔IP 변환"과 계층적 질의 흐름이다. SI에서 고객사 서버 이전·도메인 변경 시 DNS 레코드(A 레코드) 갱신과 TTL로 인한 전파 지연을 이해해야 배포·장애 대응이 매끄럽다.</div>
+    </details>
+  </section>
+
+  <footer class="recap">
+    <h2>이 세트 우선복습 3줄</h2>
+    <ol>
+      <li><b>정렬 복잡도</b> — 병합·퀵·힙은 평균 O(n log n), <b>삽입 정렬은 O(n²)</b>. 대량 데이터는 O(n log n) 계열이나 DB 정렬에 위임.</li>
+      <li><b>스택 vs 힙</b> — 지역 변수·호출 프레임은 스택(자동 할당·해제), 동적 할당 객체는 힙(GC/해제 대상). 메모리 누수 진단의 기초.</li>
+      <li><b>해시 충돌</b> — 서로 다른 키가 같은 버킷에 매핑되는 현상. <b>체이닝/개방 주소법</b>으로 해결하며 충돌이 적으면 평균 O(1).</li>
+    </ol>
+  </footer>
+</main>
+
+<script>
+  (function(){
+    /* 스크롤 진행바 */
+    var prog=document.getElementById('prog');
+    var doc=document.documentElement;
+    function onScroll(){
+      var pct=doc.scrollTop/(doc.scrollHeight-doc.clientHeight)*100;
+      prog.style.width=(pct||0)+'%';
+    }
+    document.addEventListener('scroll',onScroll,{passive:true}); onScroll();
+
+    /* 전체 정답 펼치기 */
+    var btn=document.getElementById('toggleAll'), open=false;
+    btn.addEventListener('click',function(){
+      open=!open;
+      document.querySelectorAll('details').forEach(function(d){d.open=open;});
+      btn.textContent=open?'전체 정답 접기':'전체 정답 펼치기';
+    });
+
+    /* ── 채점 상태/점수판 ── 정답은 .verdict 앞머리의 원문자(①②③④)에서 자동 추출 ── */
+    var CIRC='①②③④⑤⑥⑦⑧⑨⑩';
+    var state=[];   // 문항별 채점 결과: true(정답)/false(오답)/null(미채점)
+    var scoreEl;
+    function renderScore(){
+      var total=state.length;
+      var done=state.filter(function(s){return s!==null;}).length;
+      var correct=state.filter(function(s){return s===true;}).length;
+      scoreEl.innerHTML='채점 <b>'+done+'/'+total+'</b>'
+        +'<br>정답 <span class="ok">'+correct+'</span> · 오답 <span class="no">'+(done-correct)+'</span>';
+    }
+    function buildScore(){
+      scoreEl=document.createElement('div'); scoreEl.id='score';
+      var right=document.createElement('div');
+      right.style.cssText='display:flex;align-items:center;gap:12px';
+      var barEl=document.querySelector('.bar');
+      barEl.appendChild(right);
+      right.appendChild(scoreEl); right.appendChild(btn); // 점수판 + 기존 버튼을 우측 묶음으로
+      renderScore();
+    }
+
+    /* ── 객관식: 보기 클릭 → 채점하기 ── */
+    function setupMC(q,det,choices,ci){
+      var lis=Array.prototype.slice.call(choices.querySelectorAll('li'));
+      if(ci>=lis.length) return;
+      var idx=state.length; state.push(null);
+      var bar=document.createElement('div'); bar.className='gradebar';
+      var gbtn=document.createElement('button'); gbtn.type='button'; gbtn.className='gradebtn';
+      gbtn.textContent='채점하기'; gbtn.disabled=true;
+      var res=document.createElement('span'); res.className='result';
+      bar.appendChild(gbtn); bar.appendChild(res);
+      det.parentNode.insertBefore(bar, det);
+      lis.forEach(function(li){
+        li.classList.add('opt');
+        li.addEventListener('click',function(){
+          if(q.classList.contains('graded')) return; // 채점 후엔 잠금
+          lis.forEach(function(x){x.classList.remove('sel');});
+          li.classList.add('sel'); gbtn.disabled=false;
+        });
+      });
+      function reset(){
+        lis.forEach(function(x){x.classList.remove('sel','correct','wrong');});
+        q.classList.remove('graded','ok','no');
+        det.open=false; res.textContent=''; res.className='result';
+        gbtn.textContent='채점하기'; gbtn.disabled=true;
+        state[idx]=null; renderScore();
+      }
+      function grade(){
+        var sel=choices.querySelector('li.sel');
+        if(!sel){ bar.classList.add('nudge'); setTimeout(function(){bar.classList.remove('nudge');},350); return; }
+        var ok=lis.indexOf(sel)===ci;
+        lis[ci].classList.add('correct');
+        if(!ok) sel.classList.add('wrong');
+        q.classList.add('graded', ok?'ok':'no');
+        det.open=true;                                // 정답보기 토글 자동 오픈
+        res.textContent=ok?'✓ 정답':'✕ 오답'; res.className='result '+(ok?'ok':'no');
+        gbtn.textContent='다시 풀기';
+        state[idx]=ok; renderScore();
+      }
+      gbtn.addEventListener('click',function(){
+        q.classList.contains('graded')?reset():grade();
+      });
+    }
+
+    /* ── 서술형/구두: 타이핑 답안 → 모범답안 확인 → 스스로 채점(O/X) ── */
+    function setupText(q,det,ph,label){
+      ph=ph||'여기에 내 답안을 적어보고 모범답안과 비교하세요…';
+      label=label||'모범답안 확인';
+      var idx=state.length; state.push(null);
+      var ta=document.createElement('textarea'); ta.className='answerbox'; ta.rows=3;
+      ta.placeholder=ph;
+      det.parentNode.insertBefore(ta, det);
+      var bar=document.createElement('div'); bar.className='gradebar';
+      det.parentNode.insertBefore(bar, det);
+      function toInitial(){
+        bar.innerHTML='';
+        var gbtn=document.createElement('button'); gbtn.type='button'; gbtn.className='gradebtn';
+        gbtn.textContent=label;
+        gbtn.addEventListener('click',function(){ det.open=true; toSelf(); }); // 모범답안 자동 오픈
+        bar.appendChild(gbtn);
+      }
+      function toSelf(){
+        bar.innerHTML='';
+        var lab=document.createElement('span'); lab.className='selflabel'; lab.textContent='스스로 채점:';
+        var okB=document.createElement('button'); okB.type='button'; okB.className='selfbtn ok'; okB.textContent='✓ 맞았음';
+        var noB=document.createElement('button'); noB.type='button'; noB.className='selfbtn no'; noB.textContent='✕ 아쉬웠음';
+        var again=document.createElement('button'); again.type='button'; again.className='gradebtn'; again.textContent='다시';
+        again.style.marginLeft='4px';
+        [lab,okB,noB,again].forEach(function(el){bar.appendChild(el);});
+        function mark(ok){
+          state[idx]=ok; q.classList.add('graded'); q.classList.toggle('ok',ok); q.classList.toggle('no',!ok);
+          okB.classList.toggle('pick',ok); noB.classList.toggle('pick',!ok); renderScore();
+        }
+        okB.addEventListener('click',function(){mark(true);});
+        noB.addEventListener('click',function(){mark(false);});
+        again.addEventListener('click',function(){
+          det.open=false; q.classList.remove('graded','ok','no'); state[idx]=null; renderScore(); toInitial();
+        });
+      }
+      toInitial();
+    }
+
+    document.querySelectorAll('.q').forEach(function(q){
+      var det=q.querySelector('details');
+      if(!det) return;                                 // 정답/해설 토글이 있는 문항만
+      var choices=q.querySelector('ol.choices');
+      var verdict=q.querySelector('.verdict');
+      var ci=verdict?CIRC.indexOf(verdict.textContent.trim().charAt(0)):-1;
+      if(choices){ if(ci>=0) setupMC(q,det,choices,ci); } // 객관식(정답 키 있을 때만)
+      else setupText(q,det);                             // 서술형/단답/쿼리작성
+    });
+
+    document.querySelectorAll('.oral').forEach(function(o){    // 구두질문
+      var det=o.querySelector('details');
+      if(!det) return;
+      setupText(o,det,'여기에 내 답변을 소리 내어 말하듯 적어보고 모범답변과 비교하세요…','모범답변 확인');
+    });
+
+    buildScore();
+  })();
+</script>

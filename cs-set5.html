@@ -1,0 +1,462 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>기초 CS · 세트 5 — 자가채점 드릴</title>
+<style>
+  :root{
+    --card:#fffdf7; --line:#e7ddca; --ink:#2f2a22; --muted:#8a7f6c;
+    --brass:#b07d34; --danger:#c0392b;
+    --safe:#3f8f5f; --safe-bg:#eef7f0; --safe-line:#bcdcc6;
+    --slate:#4a5568; --slate-bg:#eef1f5; --chip:#f3ecdd;
+    --mono:ui-monospace,SFMono-Regular,Menlo,"Cascadia Mono","Roboto Mono",monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI","Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+    --paper:#f6f0e3;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --card:#232019; --line:#3b3529; --ink:#ece5d6; --muted:#9a8f7c;
+      --brass:#d3a05a; --danger:#e07a6e;
+      --safe:#7fc79a; --safe-bg:#1d2a22; --safe-line:#2f5340;
+      --slate:#aeb7c4; --slate-bg:#262b33; --chip:#2c2820;
+      --paper:#1a1712;
+    }
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--paper);color:var(--ink);
+    font-family:var(--sans);font-size:16px;line-height:1.6;
+    -webkit-font-smoothing:antialiased}
+  code{font-family:var(--mono);font-size:.9em;background:var(--chip);
+    padding:.1em .38em;border-radius:5px}
+  pre{margin:13px 0 0;background:var(--chip);border:1px solid var(--line);
+    border-radius:9px;padding:13px 15px;overflow-x:auto}
+  pre code{background:none;padding:0;font-size:13px;line-height:1.55;display:block}
+
+  /* 상단 바 + 진행바 */
+  .bar{position:sticky;top:0;z-index:20;display:flex;align-items:center;
+    gap:12px;flex-wrap:wrap;
+    background:color-mix(in srgb,var(--paper) 90%,transparent);
+    backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);padding:11px 20px}
+  .bar .brand{font-family:var(--mono);font-size:12.5px;font-weight:700;
+    color:var(--muted);white-space:nowrap}
+  .bar .brand b{color:var(--ink)}
+  #prog{position:fixed;top:0;left:0;height:3px;width:0;
+    background:var(--brass);z-index:30;transition:width .1s}
+  #toggleAll{font-family:var(--mono);font-size:12px;font-weight:700;
+    cursor:pointer;background:var(--slate);color:#fff;border:0;
+    border-radius:7px;padding:7px 13px;white-space:nowrap}
+  #toggleAll:hover{filter:brightness(1.1)}
+
+  main{max-width:760px;margin:0 auto;padding:26px 20px 80px}
+  header.head{margin:6px 0 26px}
+  .badge{display:inline-block;font-family:var(--mono);font-size:12px;
+    font-weight:700;color:var(--brass);background:var(--chip);
+    border:1px solid var(--line);border-radius:999px;padding:4px 12px}
+  .setno{font-family:var(--mono);font-size:12.5px;color:var(--muted);
+    margin-left:9px}
+  header.head h1{font-size:23px;margin:14px 0 6px;letter-spacing:-.01em}
+  header.head p{margin:0;color:var(--muted);font-size:14px}
+
+  .q,.oral{background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:19px 21px;margin:16px 0;
+    transition:border-color .15s,box-shadow .15s}
+  .qnum{font-family:var(--mono);font-size:11.5px;font-weight:700;
+    color:var(--brass);letter-spacing:.03em}
+  .qtype{font-family:var(--mono);font-size:11px;color:var(--muted);
+    margin-left:7px}
+  .qtext{margin:8px 0 0;font-size:16.5px;font-weight:600;line-height:1.5}
+
+  ol.choices{counter-reset:opt;list-style:none;margin:15px 0 0;padding:0}
+  ol.choices li{counter-increment:opt;position:relative;
+    padding:9px 13px 9px 42px;margin:6px 0;border-radius:8px;
+    font-size:15px;line-height:1.45}
+  ol.choices li::before{content:counter(opt);position:absolute;left:11px;
+    top:50%;transform:translateY(-50%);
+    width:21px;height:21px;border-radius:50%;
+    border:1.5px solid var(--muted);color:var(--muted);
+    font-family:var(--mono);font-size:12px;font-weight:700;
+    display:flex;align-items:center;justify-content:center}
+
+  details{margin-top:14px;border-top:1px dashed var(--line);padding-top:2px}
+  details summary{cursor:pointer;list-style:none;
+    font-family:var(--mono);font-size:12.5px;font-weight:700;
+    color:var(--brass);padding:10px 0 4px}
+  details summary::-webkit-details-marker{display:none}
+  details summary::before{content:"▸ ";}
+  details[open] summary::before{content:"▾ ";}
+  .verdict{font-family:var(--mono);font-weight:700;color:var(--safe);
+    background:var(--safe-bg);border:1px solid var(--safe-line);
+    border-radius:8px;padding:8px 12px;margin:6px 0 0;font-size:14px}
+  .ans{margin:11px 0 2px;font-size:14.5px;line-height:1.68;color:var(--ink)}
+
+  footer.recap{margin:34px 0 0;background:var(--slate-bg);
+    border:1px solid var(--line);border-radius:13px;padding:18px 21px}
+  footer.recap h2{font-size:14px;font-family:var(--mono);
+    margin:0 0 10px;color:var(--slate)}
+  footer.recap ol{margin:0;padding-left:20px}
+  footer.recap li{font-size:14px;line-height:1.6;margin:5px 0}
+
+  /* ── 인터랙티브 채점 ── */
+  #score{font-family:var(--mono);font-size:11px;color:var(--muted);white-space:nowrap;text-align:right;line-height:1.4}
+  #score b{color:var(--ink)} #score .ok{color:var(--safe)} #score .no{color:var(--danger)}
+  ol.choices li.opt{cursor:pointer;border-radius:8px;transition:background .12s,box-shadow .12s;-webkit-tap-highlight-color:transparent}
+  ol.choices li.opt:hover{background:var(--chip)}
+  ol.choices li.sel{background:color-mix(in srgb,var(--brass) 15%,transparent)}
+  ol.choices li.sel::before{border-color:var(--brass);color:#fff;background:var(--brass)}
+  ol.choices li.correct{background:var(--safe-bg)}
+  ol.choices li.correct::before{content:"✓";border-color:var(--safe);color:#fff;background:var(--safe)}
+  ol.choices li.wrong{background:color-mix(in srgb,var(--danger) 13%,transparent)}
+  ol.choices li.wrong::before{content:"✕";border-color:var(--danger);color:#fff;background:var(--danger)}
+  .gradebar{display:flex;align-items:center;gap:11px;margin-top:13px}
+  .gradebar.nudge{animation:shake .32s}
+  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+  .gradebtn{font-family:var(--mono);font-size:12.5px;font-weight:700;cursor:pointer;
+    background:var(--slate);color:#fff;border:0;border-radius:7px;padding:7px 15px;white-space:nowrap}
+  .gradebtn:disabled{opacity:.4;cursor:not-allowed}
+  .gradebtn:not(:disabled):hover{filter:brightness(1.1)}
+  .result{font-family:var(--mono);font-size:13px;font-weight:700;display:inline-flex;align-items:center;gap:5px}
+  .result.ok{color:var(--safe)} .result.no{color:var(--danger)}
+  .q.graded.ok,.oral.graded.ok{border-color:var(--safe-line);box-shadow:0 0 0 1px var(--safe-line)}
+  .q.graded.no,.oral.graded.no{border-color:var(--danger);box-shadow:0 0 0 1px var(--danger)}
+  /* 서술형 타이핑 답안 */
+  .answerbox{display:block;width:100%;margin-top:13px;font-family:var(--sans);font-size:14.5px;line-height:1.65;
+    color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:9px;padding:10px 13px;
+    resize:vertical;min-height:66px}
+  .answerbox:focus{outline:2px solid color-mix(in srgb,var(--brass) 42%,transparent);outline-offset:1px;border-color:var(--brass)}
+  .answerbox::placeholder{color:var(--muted);opacity:.75}
+  .selflabel{font-family:var(--mono);font-size:12px;color:var(--muted)}
+  .selfbtn{font-family:var(--mono);font-size:12px;font-weight:700;cursor:pointer;border-radius:7px;
+    padding:6px 12px;border:1px solid var(--line);background:var(--card);color:var(--ink)}
+  .selfbtn.ok{border-color:var(--safe-line);color:var(--safe)} .selfbtn.ok:hover{background:var(--safe-bg)}
+  .selfbtn.no{border-color:var(--danger);color:var(--danger)} .selfbtn.no:hover{background:color-mix(in srgb,var(--danger) 8%,transparent)}
+  .selfbtn.pick{color:#fff}
+  .selfbtn.ok.pick{background:var(--safe);border-color:var(--safe)}
+  .selfbtn.no.pick{background:var(--danger);border-color:var(--danger)}
+</style>
+
+<div id="prog"></div>
+<div class="bar">
+  <span class="brand"><b>기초 CS</b> 드릴</span>
+  <button id="toggleAll" type="button">전체 정답 펼치기</button>
+</div>
+
+<main>
+  <header class="head">
+    <span class="badge">기초 CS</span><span class="setno">세트 5 / 5</span>
+    <h1>트리 순회·정렬·동기화부터 계층 매핑·격리 수준까지</h1>
+    <p>보기를 고른 뒤 <b>채점하기</b>를 누르면 정오답과 해설이 열립니다. 서술·단답은 직접 적어보고 모범답안과 비교해 스스로 채점하세요.</p>
+  </header>
+
+  <!-- Q41 -->
+  <section class="q">
+    <div><span class="qnum">Q41</span><span class="qtype">객관식 · 트리 순회</span></div>
+    <p class="qtext">아래 이진 트리를 중위 순회(In-order)한 결과는?</p>
+    <pre><code>        A
+       / \
+      B   C
+     / \
+    D   E</code></pre>
+    <ol class="choices">
+      <li>A B D E C</li>
+      <li>D B E A C</li>
+      <li>D E B C A</li>
+      <li>A B C D E</li>
+    </ol>
+    <details>
+      <summary>정답 확인</summary>
+      <div class="verdict">② D B E A C</div>
+      <div class="ans">중위 순회는 왼쪽 → 루트 → 오른쪽 순서라 D B E A C가 된다(전위는 루트 먼저, 후위는 루트 나중). 이진 탐색 트리를 중위 순회하면 오름차순 정렬 결과가 나온다. SI에서 카테고리·조직 트리를 정해진 순서로 출력·집계할 때 순회 방식 선택이 결과 순서를 좌우한다.</div>
+    </details>
+  </section>
+
+  <!-- Q42 -->
+  <section class="q">
+    <div><span class="qnum">Q42</span><span class="qtype">객관식 · 퀵정렬</span></div>
+    <p class="qtext">퀵 정렬(Quick Sort)에 대한 설명으로 옳은 것은?</p>
+    <ol class="choices">
+      <li>평균 O(n log n)이지만 피벗 선택이 나쁘면 최악 O(n²)이 될 수 있다</li>
+      <li>항상 O(n log n)을 보장하는 안정 정렬이다</li>
+      <li>추가 메모리를 O(n)만큼 반드시 사용한다</li>
+      <li>데이터가 이미 정렬되어 있을 때 항상 가장 빠르다</li>
+    </ol>
+    <details>
+      <summary>정답 확인</summary>
+      <div class="verdict">① 평균 O(n log n)이지만 피벗 선택이 나쁘면 최악 O(n²)이 될 수 있다</div>
+      <div class="ans">퀵 정렬은 피벗 기준 분할·정복으로 평균 O(n log n)이지만, 피벗이 계속 한쪽으로 치우치면(정렬된 데이터에 첫 원소 피벗) 최악 O(n²)이 되고 불안정 정렬이다. SI에서 라이브러리 정렬을 쓸 때 최악 케이스와 안정성 요구를 알아야 알고리즘을 올바르게 선택한다.</div>
+    </details>
+  </section>
+
+  <!-- Q43 -->
+  <section class="q">
+    <div><span class="qnum">Q43</span><span class="qtype">객관식 · 교착상태 회피</span></div>
+    <p class="qtext">교착상태를 "회피(avoidance)"하기 위해 안전 상태를 유지하며 자원을 할당하는 대표 알고리즘은?</p>
+    <ol class="choices">
+      <li>다익스트라 최단경로</li>
+      <li>라운드 로빈</li>
+      <li>은행원 알고리즘(Banker's Algorithm)</li>
+      <li>퀵 정렬</li>
+    </ol>
+    <details>
+      <summary>정답 확인</summary>
+      <div class="verdict">③ 은행원 알고리즘(Banker's Algorithm)</div>
+      <div class="ans">은행원 알고리즘은 자원 할당 요청을 승인하기 전 시스템이 안전 상태를 유지하는지 검사해 교착상태를 회피한다. SI 시스템에서 한정된 커넥션 풀·락 자원을 여러 트랜잭션이 요청할 때, 자원 할당 순서·상한을 관리해 교착을 예방하는 사고방식과 맞닿아 있다.</div>
+    </details>
+  </section>
+
+  <!-- Q44 -->
+  <section class="q">
+    <div><span class="qnum">Q44</span><span class="qtype">객관식 · OSI↔TCP/IP 매핑</span></div>
+    <p class="qtext">OSI 7계층과 TCP/IP 4계층 대응으로 옳은 것은?</p>
+    <ol class="choices">
+      <li>OSI 전송 계층 ↔ TCP/IP 인터넷 계층</li>
+      <li>OSI 물리 계층 ↔ TCP/IP 전송 계층</li>
+      <li>OSI 네트워크 계층 ↔ TCP/IP 응용 계층</li>
+      <li>OSI 응용·표현·세션 계층 ↔ TCP/IP 응용 계층</li>
+    </ol>
+    <details>
+      <summary>정답 확인</summary>
+      <div class="verdict">④ OSI 응용·표현·세션 계층 ↔ TCP/IP 응용 계층</div>
+      <div class="ans">TCP/IP 응용 계층은 OSI의 응용·표현·세션 3개를 묶고, 전송↔전송, 네트워크↔인터넷, 물리·데이터링크↔네트워크 인터페이스로 대응된다. SI에서 통신 규격/패킷 분석 도구를 이해할 때 두 모델의 대응 관계가 문제 계층 진단의 공통 언어가 된다.</div>
+    </details>
+  </section>
+
+  <!-- Q45 -->
+  <section class="q">
+    <div><span class="qnum">Q45</span><span class="qtype">객관식 · ACID 격리성</span></div>
+    <p class="qtext">트랜잭션 격리 수준이 낮을 때 발생할 수 있는 현상이 <em>아닌</em> 것은?</p>
+    <ol class="choices">
+      <li>Dirty Read(커밋되지 않은 데이터를 읽음)</li>
+      <li>Non-Repeatable Read(같은 조회가 다른 값 반환)</li>
+      <li>Phantom Read(재조회 시 새로운 행이 나타남)</li>
+      <li>Deadlock(두 트랜잭션이 서로의 자원을 대기)</li>
+    </ol>
+    <details>
+      <summary>정답 확인</summary>
+      <div class="verdict">④ Deadlock(두 트랜잭션이 서로의 자원을 대기)</div>
+      <div class="ans">격리 수준이 낮을수록 Dirty/Non-Repeatable/Phantom Read가 생길 수 있으나, 교착상태(Deadlock)는 자원 잠금 대기 문제로 격리 수준 저하로 생기는 읽기 이상현상과는 범주가 다르다. SI에서 정합성이 중요한 집계·정산은 격리 수준을 높이고, 조회 위주는 낮춰 성능과 정합성을 절충한다.</div>
+    </details>
+  </section>
+
+  <!-- Q46 -->
+  <section class="q">
+    <div><span class="qnum">Q46</span><span class="qtype">객관식 · 그래프 탐색</span></div>
+    <p class="qtext">그래프 탐색에서 시작 정점과 가까운 정점부터 레벨 순으로 방문하며 주로 큐를 사용하는 방식은?</p>
+    <ol class="choices">
+      <li>너비 우선 탐색(BFS)</li>
+      <li>깊이 우선 탐색(DFS)</li>
+      <li>이진 탐색(Binary Search)</li>
+      <li>힙 정렬(Heap Sort)</li>
+    </ol>
+    <details>
+      <summary>정답 확인</summary>
+      <div class="verdict">① 너비 우선 탐색(BFS)</div>
+      <div class="ans">BFS는 큐를 이용해 가까운 정점부터 층별로 방문해 최단 경로(간선 수 기준) 탐색에 적합하고, DFS는 스택/재귀로 한 방향을 끝까지 파고든다. SI에서 조직 관계·연계 흐름에서 "가장 짧은 연결 단계"를 찾을 때 BFS를 활용한다.</div>
+    </details>
+  </section>
+
+  <!-- Q47 -->
+  <section class="q">
+    <div><span class="qnum">Q47</span><span class="qtype">객관식 · 진법(2진↔16진)</span></div>
+    <p class="qtext">2진수 11111111(2)을 16진수로 변환한 값은?</p>
+    <ol class="choices">
+      <li>0xEF</li>
+      <li>0xFF</li>
+      <li>0xF0</li>
+      <li>0x1F</li>
+    </ol>
+    <details>
+      <summary>정답 확인</summary>
+      <div class="verdict">② 0xFF</div>
+      <div class="ans">4비트씩 끊으면 1111(=F) 1111(=F)이라 0xFF이며 10진수로는 255다(1바이트 최댓값). SI에서 색상값(#FFFFFF), 인코딩, 바이트 단위 데이터를 다룰 때 2진↔16진 변환 감각이 값 해석의 기본이 된다.</div>
+    </details>
+  </section>
+
+  <!-- Q48 -->
+  <section class="q">
+    <div><span class="qnum">Q48</span><span class="qtype">객관식 · 뮤텍스 vs 세마포어</span></div>
+    <p class="qtext">동기화 기법인 뮤텍스(Mutex)와 세마포어(Semaphore)의 차이로 옳은 것은?</p>
+    <ol class="choices">
+      <li>뮤텍스는 동시에 여러 스레드가 임계구역에 들어가도록 허용한다</li>
+      <li>세마포어는 항상 0과 1 두 값만 가지는 잠금 장치다</li>
+      <li>세마포어는 카운터로 동시 접근 가능한 자원 수를 제어하고, 뮤텍스는 한 번에 하나의 스레드만 소유하는 잠금이다</li>
+      <li>뮤텍스는 값이 여러 개인 계수형 동기화 도구다</li>
+    </ol>
+    <details>
+      <summary>정답 확인</summary>
+      <div class="verdict">③ 세마포어는 카운터로 동시 접근 가능한 자원 수를 제어하고, 뮤텍스는 한 번에 하나의 스레드만 소유하는 잠금이다</div>
+      <div class="ans">뮤텍스는 상호배제를 위한 잠금으로 한 번에 한 스레드만 임계구역을 소유(소유권 개념)하고, 세마포어는 카운터(counting)로 동시 접근 가능한 자원 개수를 제어한다(이진 세마포어만 0/1). SI 다중 스레드 배치나 커넥션 풀에서 동시 접근 수를 제한할 땐 세마포어, 단일 공유 자원 보호엔 뮤텍스를 써서 경합·데이터 깨짐 같은 동시성 장애를 예방한다.</div>
+    </details>
+  </section>
+
+  <!-- Q49 -->
+  <section class="q">
+    <div><span class="qnum">Q49</span><span class="qtype">단답 · 해시테이블</span></div>
+    <p class="qtext">충돌이 적은 이상적인 상황에서 해시테이블의 검색·삽입·삭제 평균 시간복잡도를 Big-O로 쓰시오.</p>
+    <details>
+      <summary>모범답안 확인</summary>
+      <div class="verdict">모범답안 · O(1)</div>
+      <div class="ans">좋은 해시 함수로 충돌이 거의 없으면 키를 해시값으로 곧장 위치를 찾으므로 평균 O(1)이다(최악, 충돌 몰림 시엔 O(n)). SI에서 세션·캐시·코드 매핑처럼 키로 즉시 값을 찾아야 하는 저장소에 해시 기반 구조(HashMap 등)를 쓰는 이유다.</div>
+    </details>
+  </section>
+
+  <!-- Q50 -->
+  <section class="q">
+    <div><span class="qnum">Q50</span><span class="qtype">서술형 · 프로세스 상태전이</span></div>
+    <p class="qtext">프로세스의 주요 상태(생성/준비/실행/대기/종료) 중 준비(Ready)·실행(Running)·대기(Blocked/Waiting) 세 상태 사이의 전이를 설명하시오.</p>
+    <details>
+      <summary>모범답안 확인</summary>
+      <div class="verdict">모범답안</div>
+      <div class="ans">준비(Ready)는 CPU 할당만 기다리는 상태, 실행(Running)은 CPU를 받아 명령을 수행 중인 상태, 대기(Blocked)는 I/O 등 이벤트 완료를 기다리는 상태다. 전이는 ① 준비→실행: 스케줄러가 CPU를 배정(dispatch), ② 실행→준비: 타임 슬라이스 만료 등으로 선점(preempt), ③ 실행→대기: I/O 요청으로 블록, ④ 대기→준비: I/O 완료로 다시 준비 큐로 이동한다.<br><br>채점 포인트는 세 상태의 의미와 네 방향 전이(디스패치·선점·블록·완료)다. SI 서버에서 스레드가 DB/파일 I/O로 대기 상태에 오래 머물면 처리량이 떨어지므로, 비동기·논블로킹 처리로 대기 시간을 줄이는 설계와 직결된다.</div>
+    </details>
+  </section>
+
+  <footer class="recap">
+    <h2>이 세트 우선복습 3줄</h2>
+    <ol>
+      <li><b>트리 순회 순서</b> — 중위(In-order)는 왼쪽 → 루트 → 오른쪽. 이진 탐색 트리를 중위 순회하면 오름차순이 나온다. 전위=루트 먼저, 후위=루트 나중으로 구분.</li>
+      <li><b>뮤텍스 vs 세마포어</b> — 뮤텍스는 한 번에 한 스레드만 소유하는 잠금(상호배제), 세마포어는 카운터로 동시 접근 자원 수를 제어. 이진 세마포어만 0/1.</li>
+      <li><b>격리 수준 ≠ 교착상태</b> — 격리 수준 저하로 생기는 건 Dirty·Non-Repeatable·Phantom Read. Deadlock은 자원 잠금 대기 문제로 범주가 다르다.</li>
+    </ol>
+  </footer>
+</main>
+
+<script>
+  (function(){
+    /* 스크롤 진행바 */
+    var prog=document.getElementById('prog');
+    var doc=document.documentElement;
+    function onScroll(){
+      var pct=doc.scrollTop/(doc.scrollHeight-doc.clientHeight)*100;
+      prog.style.width=(pct||0)+'%';
+    }
+    document.addEventListener('scroll',onScroll,{passive:true}); onScroll();
+
+    /* 전체 정답 펼치기 */
+    var btn=document.getElementById('toggleAll'), open=false;
+    btn.addEventListener('click',function(){
+      open=!open;
+      document.querySelectorAll('details').forEach(function(d){d.open=open;});
+      btn.textContent=open?'전체 정답 접기':'전체 정답 펼치기';
+    });
+
+    /* ── 채점 상태/점수판 ── 정답은 .verdict 앞머리의 원문자(①②③④)에서 자동 추출 ── */
+    var CIRC='①②③④⑤⑥⑦⑧⑨⑩';
+    var state=[];   // 문항별 채점 결과: true(정답)/false(오답)/null(미채점)
+    var scoreEl;
+    function renderScore(){
+      var total=state.length;
+      var done=state.filter(function(s){return s!==null;}).length;
+      var correct=state.filter(function(s){return s===true;}).length;
+      scoreEl.innerHTML='채점 <b>'+done+'/'+total+'</b>'
+        +'<br>정답 <span class="ok">'+correct+'</span> · 오답 <span class="no">'+(done-correct)+'</span>';
+    }
+    function buildScore(){
+      scoreEl=document.createElement('div'); scoreEl.id='score';
+      var right=document.createElement('div');
+      right.style.cssText='display:flex;align-items:center;gap:12px';
+      var barEl=document.querySelector('.bar');
+      barEl.appendChild(right);
+      right.appendChild(scoreEl); right.appendChild(btn); // 점수판 + 기존 버튼을 우측 묶음으로
+      renderScore();
+    }
+
+    /* ── 객관식: 보기 클릭 → 채점하기 ── */
+    function setupMC(q,det,choices,ci){
+      var lis=Array.prototype.slice.call(choices.querySelectorAll('li'));
+      if(ci>=lis.length) return;
+      var idx=state.length; state.push(null);
+      var bar=document.createElement('div'); bar.className='gradebar';
+      var gbtn=document.createElement('button'); gbtn.type='button'; gbtn.className='gradebtn';
+      gbtn.textContent='채점하기'; gbtn.disabled=true;
+      var res=document.createElement('span'); res.className='result';
+      bar.appendChild(gbtn); bar.appendChild(res);
+      det.parentNode.insertBefore(bar, det);
+      lis.forEach(function(li){
+        li.classList.add('opt');
+        li.addEventListener('click',function(){
+          if(q.classList.contains('graded')) return; // 채점 후엔 잠금
+          lis.forEach(function(x){x.classList.remove('sel');});
+          li.classList.add('sel'); gbtn.disabled=false;
+        });
+      });
+      function reset(){
+        lis.forEach(function(x){x.classList.remove('sel','correct','wrong');});
+        q.classList.remove('graded','ok','no');
+        det.open=false; res.textContent=''; res.className='result';
+        gbtn.textContent='채점하기'; gbtn.disabled=true;
+        state[idx]=null; renderScore();
+      }
+      function grade(){
+        var sel=choices.querySelector('li.sel');
+        if(!sel){ bar.classList.add('nudge'); setTimeout(function(){bar.classList.remove('nudge');},350); return; }
+        var ok=lis.indexOf(sel)===ci;
+        lis[ci].classList.add('correct');
+        if(!ok) sel.classList.add('wrong');
+        q.classList.add('graded', ok?'ok':'no');
+        det.open=true;                                // 정답보기 토글 자동 오픈
+        res.textContent=ok?'✓ 정답':'✕ 오답'; res.className='result '+(ok?'ok':'no');
+        gbtn.textContent='다시 풀기';
+        state[idx]=ok; renderScore();
+      }
+      gbtn.addEventListener('click',function(){
+        q.classList.contains('graded')?reset():grade();
+      });
+    }
+
+    /* ── 서술형/구두: 타이핑 답안 → 모범답안 확인 → 스스로 채점(O/X) ── */
+    function setupText(q,det,ph,label){
+      ph=ph||'여기에 내 답안을 적어보고 모범답안과 비교하세요…';
+      label=label||'모범답안 확인';
+      var idx=state.length; state.push(null);
+      var ta=document.createElement('textarea'); ta.className='answerbox'; ta.rows=3;
+      ta.placeholder=ph;
+      det.parentNode.insertBefore(ta, det);
+      var bar=document.createElement('div'); bar.className='gradebar';
+      det.parentNode.insertBefore(bar, det);
+      function toInitial(){
+        bar.innerHTML='';
+        var gbtn=document.createElement('button'); gbtn.type='button'; gbtn.className='gradebtn';
+        gbtn.textContent=label;
+        gbtn.addEventListener('click',function(){ det.open=true; toSelf(); }); // 모범답안 자동 오픈
+        bar.appendChild(gbtn);
+      }
+      function toSelf(){
+        bar.innerHTML='';
+        var lab=document.createElement('span'); lab.className='selflabel'; lab.textContent='스스로 채점:';
+        var okB=document.createElement('button'); okB.type='button'; okB.className='selfbtn ok'; okB.textContent='✓ 맞았음';
+        var noB=document.createElement('button'); noB.type='button'; noB.className='selfbtn no'; noB.textContent='✕ 아쉬웠음';
+        var again=document.createElement('button'); again.type='button'; again.className='gradebtn'; again.textContent='다시';
+        again.style.marginLeft='4px';
+        [lab,okB,noB,again].forEach(function(el){bar.appendChild(el);});
+        function mark(ok){
+          state[idx]=ok; q.classList.add('graded'); q.classList.toggle('ok',ok); q.classList.toggle('no',!ok);
+          okB.classList.toggle('pick',ok); noB.classList.toggle('pick',!ok); renderScore();
+        }
+        okB.addEventListener('click',function(){mark(true);});
+        noB.addEventListener('click',function(){mark(false);});
+        again.addEventListener('click',function(){
+          det.open=false; q.classList.remove('graded','ok','no'); state[idx]=null; renderScore(); toInitial();
+        });
+      }
+      toInitial();
+    }
+
+    document.querySelectorAll('.q').forEach(function(q){
+      var det=q.querySelector('details');
+      if(!det) return;                                 // 정답/해설 토글이 있는 문항만
+      var choices=q.querySelector('ol.choices');
+      var verdict=q.querySelector('.verdict');
+      var ci=verdict?CIRC.indexOf(verdict.textContent.trim().charAt(0)):-1;
+      if(choices){ if(ci>=0) setupMC(q,det,choices,ci); } // 객관식(정답 키 있을 때만)
+      else setupText(q,det);                             // 서술형/단답/쿼리작성
+    });
+
+    document.querySelectorAll('.oral').forEach(function(o){    // 구두질문
+      var det=o.querySelector('details');
+      if(!det) return;
+      setupText(o,det,'여기에 내 답변을 소리 내어 말하듯 적어보고 모범답변과 비교하세요…','모범답변 확인');
+    });
+
+    buildScore();
+  })();
+</script>

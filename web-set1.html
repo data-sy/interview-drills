@@ -1,0 +1,451 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>웹 기초 · 세트 1 — 자가채점 드릴</title>
+<style>
+  :root{
+    --card:#fffdf7; --line:#e7ddca; --ink:#2f2a22; --muted:#8a7f6c;
+    --brass:#b07d34; --danger:#c0392b;
+    --safe:#3f8f5f; --safe-bg:#eef7f0; --safe-line:#bcdcc6;
+    --slate:#4a5568; --slate-bg:#eef1f5; --chip:#f3ecdd;
+    --mono:ui-monospace,SFMono-Regular,Menlo,"Cascadia Mono","Roboto Mono",monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI","Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+    --paper:#f6f0e3;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --card:#232019; --line:#3b3529; --ink:#ece5d6; --muted:#9a8f7c;
+      --brass:#d3a05a; --danger:#e07a6e;
+      --safe:#7fc79a; --safe-bg:#1d2a22; --safe-line:#2f5340;
+      --slate:#aeb7c4; --slate-bg:#262b33; --chip:#2c2820;
+      --paper:#1a1712;
+    }
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--paper);color:var(--ink);
+    font-family:var(--sans);font-size:16px;line-height:1.6;
+    -webkit-font-smoothing:antialiased}
+  code{font-family:var(--mono);font-size:.9em;background:var(--chip);
+    padding:.1em .38em;border-radius:5px}
+  pre{margin:13px 0 0;background:var(--chip);border:1px solid var(--line);
+    border-radius:9px;padding:13px 15px;overflow-x:auto}
+  pre code{background:none;padding:0;font-size:13px;line-height:1.55;display:block}
+
+  /* 상단 바 + 진행바 */
+  .bar{position:sticky;top:0;z-index:20;display:flex;align-items:center;
+    gap:12px;flex-wrap:wrap;
+    background:color-mix(in srgb,var(--paper) 90%,transparent);
+    backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);padding:11px 20px}
+  .bar .brand{font-family:var(--mono);font-size:12.5px;font-weight:700;
+    color:var(--muted);white-space:nowrap}
+  .bar .brand b{color:var(--ink)}
+  #prog{position:fixed;top:0;left:0;height:3px;width:0;
+    background:var(--brass);z-index:30;transition:width .1s}
+  #toggleAll{font-family:var(--mono);font-size:12px;font-weight:700;
+    cursor:pointer;background:var(--slate);color:#fff;border:0;
+    border-radius:7px;padding:7px 13px;white-space:nowrap}
+  #toggleAll:hover{filter:brightness(1.1)}
+
+  main{max-width:760px;margin:0 auto;padding:26px 20px 80px}
+  header.head{margin:6px 0 26px}
+  .badge{display:inline-block;font-family:var(--mono);font-size:12px;
+    font-weight:700;color:var(--brass);background:var(--chip);
+    border:1px solid var(--line);border-radius:999px;padding:4px 12px}
+  .setno{font-family:var(--mono);font-size:12.5px;color:var(--muted);
+    margin-left:9px}
+  header.head h1{font-size:23px;margin:14px 0 6px;letter-spacing:-.01em}
+  header.head p{margin:0;color:var(--muted);font-size:14px}
+
+  .q,.oral{background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:19px 21px;margin:16px 0;
+    transition:border-color .15s,box-shadow .15s}
+  .qnum{font-family:var(--mono);font-size:11.5px;font-weight:700;
+    color:var(--brass);letter-spacing:.03em}
+  .qtype{font-family:var(--mono);font-size:11px;color:var(--muted);
+    margin-left:7px}
+  .qtext{margin:8px 0 0;font-size:16.5px;font-weight:600;line-height:1.5}
+
+  ol.choices{counter-reset:opt;list-style:none;margin:15px 0 0;padding:0}
+  ol.choices li{counter-increment:opt;position:relative;
+    padding:9px 13px 9px 42px;margin:6px 0;border-radius:8px;
+    font-size:15px;line-height:1.45}
+  ol.choices li::before{content:counter(opt);position:absolute;left:11px;
+    top:50%;transform:translateY(-50%);
+    width:21px;height:21px;border-radius:50%;
+    border:1.5px solid var(--muted);color:var(--muted);
+    font-family:var(--mono);font-size:12px;font-weight:700;
+    display:flex;align-items:center;justify-content:center}
+
+  details{margin-top:14px;border-top:1px dashed var(--line);padding-top:2px}
+  details summary{cursor:pointer;list-style:none;
+    font-family:var(--mono);font-size:12.5px;font-weight:700;
+    color:var(--brass);padding:10px 0 4px}
+  details summary::-webkit-details-marker{display:none}
+  details summary::before{content:"▸ ";}
+  details[open] summary::before{content:"▾ ";}
+  .verdict{font-family:var(--mono);font-weight:700;color:var(--safe);
+    background:var(--safe-bg);border:1px solid var(--safe-line);
+    border-radius:8px;padding:8px 12px;margin:6px 0 0;font-size:14px}
+  .ans{margin:11px 0 2px;font-size:14.5px;line-height:1.68;color:var(--ink)}
+
+  footer.recap{margin:34px 0 0;background:var(--slate-bg);
+    border:1px solid var(--line);border-radius:13px;padding:18px 21px}
+  footer.recap h2{font-size:14px;font-family:var(--mono);
+    margin:0 0 10px;color:var(--slate)}
+  footer.recap ol{margin:0;padding-left:20px}
+  footer.recap li{font-size:14px;line-height:1.6;margin:5px 0}
+
+  /* ── 인터랙티브 채점 ── */
+  #score{font-family:var(--mono);font-size:11px;color:var(--muted);white-space:nowrap;text-align:right;line-height:1.4}
+  #score b{color:var(--ink)} #score .ok{color:var(--safe)} #score .no{color:var(--danger)}
+  ol.choices li.opt{cursor:pointer;border-radius:8px;transition:background .12s,box-shadow .12s;-webkit-tap-highlight-color:transparent}
+  ol.choices li.opt:hover{background:var(--chip)}
+  ol.choices li.sel{background:color-mix(in srgb,var(--brass) 15%,transparent)}
+  ol.choices li.sel::before{border-color:var(--brass);color:#fff;background:var(--brass)}
+  ol.choices li.correct{background:var(--safe-bg)}
+  ol.choices li.correct::before{content:"✓";border-color:var(--safe);color:#fff;background:var(--safe)}
+  ol.choices li.wrong{background:color-mix(in srgb,var(--danger) 13%,transparent)}
+  ol.choices li.wrong::before{content:"✕";border-color:var(--danger);color:#fff;background:var(--danger)}
+  .gradebar{display:flex;align-items:center;gap:11px;margin-top:13px}
+  .gradebar.nudge{animation:shake .32s}
+  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+  .gradebtn{font-family:var(--mono);font-size:12.5px;font-weight:700;cursor:pointer;
+    background:var(--slate);color:#fff;border:0;border-radius:7px;padding:7px 15px;white-space:nowrap}
+  .gradebtn:disabled{opacity:.4;cursor:not-allowed}
+  .gradebtn:not(:disabled):hover{filter:brightness(1.1)}
+  .result{font-family:var(--mono);font-size:13px;font-weight:700;display:inline-flex;align-items:center;gap:5px}
+  .result.ok{color:var(--safe)} .result.no{color:var(--danger)}
+  .q.graded.ok,.oral.graded.ok{border-color:var(--safe-line);box-shadow:0 0 0 1px var(--safe-line)}
+  .q.graded.no,.oral.graded.no{border-color:var(--danger);box-shadow:0 0 0 1px var(--danger)}
+  /* 서술형 타이핑 답안 */
+  .answerbox{display:block;width:100%;margin-top:13px;font-family:var(--sans);font-size:14.5px;line-height:1.65;
+    color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:9px;padding:10px 13px;
+    resize:vertical;min-height:66px}
+  .answerbox:focus{outline:2px solid color-mix(in srgb,var(--brass) 42%,transparent);outline-offset:1px;border-color:var(--brass)}
+  .answerbox::placeholder{color:var(--muted);opacity:.75}
+  .selflabel{font-family:var(--mono);font-size:12px;color:var(--muted)}
+  .selfbtn{font-family:var(--mono);font-size:12px;font-weight:700;cursor:pointer;border-radius:7px;
+    padding:6px 12px;border:1px solid var(--line);background:var(--card);color:var(--ink)}
+  .selfbtn.ok{border-color:var(--safe-line);color:var(--safe)} .selfbtn.ok:hover{background:var(--safe-bg)}
+  .selfbtn.no{border-color:var(--danger);color:var(--danger)} .selfbtn.no:hover{background:color-mix(in srgb,var(--danger) 8%,transparent)}
+  .selfbtn.pick{color:#fff}
+  .selfbtn.ok.pick{background:var(--safe);border-color:var(--safe)}
+  .selfbtn.no.pick{background:var(--danger);border-color:var(--danger)}
+</style>
+
+<div id="prog"></div>
+<div class="bar">
+  <span class="brand"><b>웹 기초</b> 드릴</span>
+  <button id="toggleAll" type="button">전체 정답 펼치기</button>
+</div>
+
+<main>
+  <header class="head">
+    <span class="badge">웹 기초</span><span class="setno">세트 1 / 5</span>
+    <h1>HTTP·상태코드·쿠키/세션부터 MVC·REST·웹서버까지</h1>
+    <p>보기를 고른 뒤 <b>채점하기</b>를 누르면 정오답과 해설이 열립니다. 서술형은 직접 적어보고 모범답안과 비교해 스스로 채점하세요.</p>
+  </header>
+
+  <!-- Q1 -->
+  <section class="q">
+    <div><span class="qnum">Q1</span><span class="qtype">객관식 · HTTP 메서드(GET/POST)</span></div>
+    <p class="qtext">GET과 POST 메서드의 차이에 대한 설명으로 옳은 것은?</p>
+    <ol class="choices">
+      <li>GET은 요청 데이터를 본문(body)에, POST는 URL 쿼리스트링에 담는다</li>
+      <li>GET은 본문 크기 제한이 없고 POST는 제한이 있다</li>
+      <li>GET은 주로 조회, POST는 주로 생성/제출에 쓰며 GET 파라미터는 URL에 노출된다</li>
+      <li>POST는 브라우저 캐시·북마크가 GET보다 쉽다</li>
+    </ol>
+    <details>
+      <summary>정답 확인</summary>
+      <div class="verdict">③ GET은 주로 조회, POST는 주로 생성/제출에 쓰며 GET 파라미터는 URL에 노출된다</div>
+      <div class="ans">GET은 리소스 조회용으로 파라미터가 URL 쿼리스트링에 붙어 노출·캐시·북마크가 되고, POST는 데이터를 본문에 담아 생성/변경 요청에 쓴다. SI에서 검색·조회 화면은 GET, 등록/결재 폼 전송은 POST로 설계해야 URL 노출과 재전송 문제를 줄인다.</div>
+    </details>
+  </section>
+
+  <!-- Q2 -->
+  <section class="q">
+    <div><span class="qnum">Q2</span><span class="qtype">객관식 · 상태코드 2xx~5xx 대분류</span></div>
+    <p class="qtext">HTTP 상태코드 대분류의 의미를 <em>잘못</em> 짝지은 것은?</p>
+    <ol class="choices">
+      <li>2xx — 요청 성공</li>
+      <li>3xx — 리다이렉션(추가 동작 필요)</li>
+      <li>4xx — 클라이언트 오류</li>
+      <li>5xx — 클라이언트 요청 문법 오류</li>
+    </ol>
+    <details>
+      <summary>정답 확인</summary>
+      <div class="verdict">④ 5xx — 클라이언트 요청 문법 오류</div>
+      <div class="ans">5xx는 서버 측 오류이며, 클라이언트 요청 자체의 문제는 4xx다. 고객사 장애 문의를 받을 때 4xx면 요청·권한을, 5xx면 서버·DB 로그를 먼저 봐야 하므로 대분류 구분이 1차 분류의 기준이 된다.</div>
+    </details>
+  </section>
+
+  <!-- Q3 -->
+  <section class="q">
+    <div><span class="qnum">Q3</span><span class="qtype">객관식 · 요청 메시지 구조</span></div>
+    <p class="qtext">HTTP 요청 메시지의 구성 요소로 올바른 순서는?</p>
+    <ol class="choices">
+      <li>요청 라인(메서드·URI·버전) → 헤더 → 본문</li>
+      <li>상태 라인 → 헤더 → 본문</li>
+      <li>헤더 → 요청 라인 → 본문</li>
+      <li>요청 라인 → 본문 → 헤더</li>
+    </ol>
+    <details>
+      <summary>정답 확인</summary>
+      <div class="verdict">① 요청 라인(메서드·URI·버전) → 헤더 → 본문</div>
+      <div class="ans">요청은 '요청 라인(메서드·경로·HTTP버전) → 헤더 → 빈 줄 → 본문' 순서이며, '상태 라인'은 응답 메시지의 첫 줄이다. 프록시·게이트웨이 로그를 분석하거나 API 연동 오류를 추적할 때 어느 라인·헤더가 문제인지 구조를 알아야 원인을 짚을 수 있다.</div>
+    </details>
+  </section>
+
+  <!-- Q4 -->
+  <section class="q">
+    <div><span class="qnum">Q4</span><span class="qtype">객관식 · 쿠키 vs 세션(저장위치)</span></div>
+    <p class="qtext">쿠키와 세션의 저장 위치에 대한 설명으로 옳은 것은?</p>
+    <ol class="choices">
+      <li>쿠키는 서버 메모리, 세션은 클라이언트 브라우저에 저장된다</li>
+      <li>쿠키와 세션 모두 서버 DB에만 저장된다</li>
+      <li>쿠키는 클라이언트에, 세션 데이터는 서버에 저장되고 세션ID만 쿠키로 오간다</li>
+      <li>세션은 클라이언트 디스크에 영구 저장된다</li>
+    </ol>
+    <details>
+      <summary>정답 확인</summary>
+      <div class="verdict">③ 쿠키는 클라이언트에, 세션 데이터는 서버에 저장되고 세션ID만 쿠키로 오간다</div>
+      <div class="ans">쿠키는 브라우저에 저장되어 매 요청에 실려 가고, 세션 데이터는 서버가 보관하며 식별용 세션ID만 쿠키로 주고받는다. 민감정보(권한·로그인 상태)를 세션에 두는 이유가 여기 있고, SI 다중 서버 환경에선 세션 불일치 때문에 세션 클러스터링/스토리지 분리가 필요해진다.</div>
+    </details>
+  </section>
+
+  <!-- Q5 -->
+  <section class="q">
+    <div><span class="qnum">Q5</span><span class="qtype">객관식 · MVC 패턴(역할)</span></div>
+    <p class="qtext">웹 MVC 패턴에서 각 구성요소의 역할로 옳은 것은?</p>
+    <ol class="choices">
+      <li>Model은 화면 출력, View는 데이터 처리, Controller는 저장을 담당한다</li>
+      <li>Model이 사용자 요청을 직접 받아 라우팅한다</li>
+      <li>Controller는 화면을, View는 DB 접근을 담당한다</li>
+      <li>Model은 데이터·비즈니스 로직, View는 화면 표현, Controller는 요청 처리·흐름 제어를 담당한다</li>
+    </ol>
+    <details>
+      <summary>정답 확인</summary>
+      <div class="verdict">④ Model은 데이터·비즈니스 로직, View는 화면 표현, Controller는 요청 처리·흐름 제어를 담당한다</div>
+      <div class="ans">Model은 데이터와 업무 로직, View는 사용자에게 보이는 화면, Controller는 요청을 받아 Model과 View를 연결하는 흐름 제어를 맡는다. 역할이 분리돼야 화면 변경이 로직에 영향을 주지 않아, 고객사 UI 수정 요청이 잦은 SI 유지보수에서 특히 유리하다.</div>
+    </details>
+  </section>
+
+  <!-- Q6 -->
+  <section class="q">
+    <div><span class="qnum">Q6</span><span class="qtype">객관식 · REST/RESTful(URI 설계)</span></div>
+    <p class="qtext">RESTful한 URI 설계로 가장 적절한 것은? (게시글 3번 조회)</p>
+    <ol class="choices">
+      <li><code>GET /getBoard?id=3</code></li>
+      <li><code>POST /board/select/3</code></li>
+      <li><code>GET /boards/3</code></li>
+      <li><code>GET /boards/3/delete</code></li>
+    </ol>
+    <details>
+      <summary>정답 확인</summary>
+      <div class="verdict">③ GET /boards/3</div>
+      <div class="ans">REST는 URI에 자원을 명사로 표현하고 행위는 HTTP 메서드로 구분하므로, 조회는 'GET /boards/3'가 옳다. 동사(get/select/delete)를 URI에 넣지 않는다. SI에서 여러 팀·외부사와 API를 연동할 때 일관된 REST 규칙은 문서·소통 비용을 줄여준다.</div>
+    </details>
+  </section>
+
+  <!-- Q7 -->
+  <section class="q">
+    <div><span class="qnum">Q7</span><span class="qtype">객관식 · HTML/CSS/JS 역할분담</span></div>
+    <p class="qtext">웹 프론트엔드 3요소의 역할을 옳게 짝지은 것은?</p>
+    <ol class="choices">
+      <li>HTML은 스타일, CSS는 동작, JS는 구조</li>
+      <li>HTML은 동작, CSS는 구조, JS는 스타일</li>
+      <li>HTML은 구조·내용, CSS는 표현·스타일, JS는 동작·상호작용</li>
+      <li>셋 모두 화면 스타일만 담당한다</li>
+    </ol>
+    <details>
+      <summary>정답 확인</summary>
+      <div class="verdict">③ HTML은 구조·내용, CSS는 표현·스타일, JS는 동작·상호작용</div>
+      <div class="ans">HTML은 문서의 구조와 내용, CSS는 색·배치 등 표현, JS는 이벤트·동적 처리를 담당한다. 이 관심사 분리를 지켜야 퍼블리셔·개발자 협업과 화면 유지보수가 쉬워지며, SI 구축 프로젝트에서 마크업/스타일/스크립트 분업의 기준이 된다.</div>
+    </details>
+  </section>
+
+  <!-- Q8 -->
+  <section class="q">
+    <div><span class="qnum">Q8</span><span class="qtype">서술형 · HTTP/HTTPS·SSL/TLS</span></div>
+    <p class="qtext">HTTP와 HTTPS의 차이를 설명하고, HTTPS가 보안을 제공하기 위해 사용하는 SSL/TLS의 역할을 서술하시오.</p>
+    <details>
+      <summary>모범답안 확인</summary>
+      <div class="verdict">모범답안</div>
+      <div class="ans">HTTP는 데이터를 평문으로 전송해 도청·변조·위장에 취약한 반면, HTTPS는 HTTP 통신에 SSL/TLS 암호화 계층을 더한 것이다. SSL/TLS는 (1) 서버 인증서로 상대 서버가 진짜인지 확인(인증), (2) 대칭키로 본문을 암호화(기밀성), (3) 데이터 변조 여부 검증(무결성)을 제공한다. 기본 포트는 HTTP 80, HTTPS 443이다.<br><br>채점 포인트는 평문 vs 암호화, SSL/TLS의 인증·기밀성·무결성 세 역할, 포트 차이다. 고객사 로그인·결제·개인정보 화면은 HTTPS 적용이 사실상 필수이고, 인증서 만료로 접속 장애가 나는 사례가 흔해 SI 운영에서 인증서 갱신 관리가 중요하다.</div>
+    </details>
+  </section>
+
+  <!-- Q9 -->
+  <section class="q">
+    <div><span class="qnum">Q9</span><span class="qtype">서술형 · 무상태성</span></div>
+    <p class="qtext">HTTP의 '무상태성(Stateless)'이 무엇인지 설명하고, 이로 인해 로그인 상태 유지를 위해 어떤 보완이 필요한지 서술하시오.</p>
+    <details>
+      <summary>모범답안 확인</summary>
+      <div class="verdict">모범답안</div>
+      <div class="ans">무상태성이란 서버가 각 요청을 독립적으로 처리하며 이전 요청의 상태(누가 로그인했는지 등)를 기억하지 않는 특성이다. 그래서 요청마다 사용자를 식별할 수 없으므로, 쿠키·세션이나 토큰(JWT) 같은 별도 수단으로 상태를 유지·전달해야 한다. 무상태성 덕분에 서버 확장(스케일아웃)이 쉬워지는 장점도 있다.<br><br>채점 포인트는 '요청 간 상태를 기억하지 않음' 정의, 상태 유지 보완책(세션/토큰), 그리고 확장성 이점이다. SI에서 트래픽 증가 대비 서버를 늘릴 때 무상태 설계가 유리하지만, 세션을 서버 메모리에만 두면 서버 간 상태 공유 문제가 생긴다.</div>
+    </details>
+  </section>
+
+  <!-- Q10 -->
+  <section class="q">
+    <div><span class="qnum">Q10</span><span class="qtype">서술형 · 웹서버 vs WAS</span></div>
+    <p class="qtext">웹서버(Web Server)와 WAS(Web Application Server)의 차이를 역할 중심으로 설명하시오.</p>
+    <details>
+      <summary>모범답안 확인</summary>
+      <div class="verdict">모범답안</div>
+      <div class="ans">웹서버는 HTML·이미지·CSS 같은 정적 콘텐츠를 클라이언트에 전달하는 서버(예: Apache, Nginx)다. WAS는 JSP·서블릿 등 동적 처리를 수행해 DB 연동·비즈니스 로직 결과를 만들어내는 서버(예: Tomcat, WebLogic)다. 실무에서는 웹서버가 앞단에서 정적 요청과 로드밸런싱을 맡고 동적 요청만 뒤단 WAS로 넘기는 구성이 일반적이다.<br><br>채점 포인트는 정적 vs 동적 처리 구분, 대표 제품 예시, 웹서버-WAS 분리 구성의 이유(부하 분산·보안)다. SI 구축 시 이 2계층 구조를 이해해야 정적 자원 캐싱, WAS 다중화 같은 성능·안정성 설계를 할 수 있다.</div>
+    </details>
+  </section>
+
+  <footer class="recap">
+    <h2>이 세트 우선복습 3줄</h2>
+    <ol>
+      <li><b>상태코드 대분류</b> — 4xx는 클라이언트 오류, <b>5xx는 서버 오류</b>. 장애 1차 분류: 4xx면 요청·권한, 5xx면 서버·DB 로그부터.</li>
+      <li><b>쿠키 vs 세션 저장위치</b> — 쿠키는 클라이언트에, 세션 데이터는 <b>서버</b>에 저장되고 세션ID만 쿠키로 오간다.</li>
+      <li><b>RESTful URI</b> — 자원은 명사, 행위는 HTTP 메서드. 조회는 <code>GET /boards/3</code>지 <code>/getBoard?id=3</code>·<code>/board/select/3</code>가 아니다.</li>
+    </ol>
+  </footer>
+</main>
+
+<script>
+  (function(){
+    /* 스크롤 진행바 */
+    var prog=document.getElementById('prog');
+    var doc=document.documentElement;
+    function onScroll(){
+      var pct=doc.scrollTop/(doc.scrollHeight-doc.clientHeight)*100;
+      prog.style.width=(pct||0)+'%';
+    }
+    document.addEventListener('scroll',onScroll,{passive:true}); onScroll();
+
+    /* 전체 정답 펼치기 */
+    var btn=document.getElementById('toggleAll'), open=false;
+    btn.addEventListener('click',function(){
+      open=!open;
+      document.querySelectorAll('details').forEach(function(d){d.open=open;});
+      btn.textContent=open?'전체 정답 접기':'전체 정답 펼치기';
+    });
+
+    /* ── 채점 상태/점수판 ── 정답은 .verdict 앞머리의 원문자(①②③④)에서 자동 추출 ── */
+    var CIRC='①②③④⑤⑥⑦⑧⑨⑩';
+    var state=[];   // 문항별 채점 결과: true(정답)/false(오답)/null(미채점)
+    var scoreEl;
+    function renderScore(){
+      var total=state.length;
+      var done=state.filter(function(s){return s!==null;}).length;
+      var correct=state.filter(function(s){return s===true;}).length;
+      scoreEl.innerHTML='채점 <b>'+done+'/'+total+'</b>'
+        +'<br>정답 <span class="ok">'+correct+'</span> · 오답 <span class="no">'+(done-correct)+'</span>';
+    }
+    function buildScore(){
+      scoreEl=document.createElement('div'); scoreEl.id='score';
+      var right=document.createElement('div');
+      right.style.cssText='display:flex;align-items:center;gap:12px';
+      var barEl=document.querySelector('.bar');
+      barEl.appendChild(right);
+      right.appendChild(scoreEl); right.appendChild(btn); // 점수판 + 기존 버튼을 우측 묶음으로
+      renderScore();
+    }
+
+    /* ── 객관식: 보기 클릭 → 채점하기 ── */
+    function setupMC(q,det,choices,ci){
+      var lis=Array.prototype.slice.call(choices.querySelectorAll('li'));
+      if(ci>=lis.length) return;
+      var idx=state.length; state.push(null);
+      var bar=document.createElement('div'); bar.className='gradebar';
+      var gbtn=document.createElement('button'); gbtn.type='button'; gbtn.className='gradebtn';
+      gbtn.textContent='채점하기'; gbtn.disabled=true;
+      var res=document.createElement('span'); res.className='result';
+      bar.appendChild(gbtn); bar.appendChild(res);
+      det.parentNode.insertBefore(bar, det);
+      lis.forEach(function(li){
+        li.classList.add('opt');
+        li.addEventListener('click',function(){
+          if(q.classList.contains('graded')) return; // 채점 후엔 잠금
+          lis.forEach(function(x){x.classList.remove('sel');});
+          li.classList.add('sel'); gbtn.disabled=false;
+        });
+      });
+      function reset(){
+        lis.forEach(function(x){x.classList.remove('sel','correct','wrong');});
+        q.classList.remove('graded','ok','no');
+        det.open=false; res.textContent=''; res.className='result';
+        gbtn.textContent='채점하기'; gbtn.disabled=true;
+        state[idx]=null; renderScore();
+      }
+      function grade(){
+        var sel=choices.querySelector('li.sel');
+        if(!sel){ bar.classList.add('nudge'); setTimeout(function(){bar.classList.remove('nudge');},350); return; }
+        var ok=lis.indexOf(sel)===ci;
+        lis[ci].classList.add('correct');
+        if(!ok) sel.classList.add('wrong');
+        q.classList.add('graded', ok?'ok':'no');
+        det.open=true;                                // 정답보기 토글 자동 오픈
+        res.textContent=ok?'✓ 정답':'✕ 오답'; res.className='result '+(ok?'ok':'no');
+        gbtn.textContent='다시 풀기';
+        state[idx]=ok; renderScore();
+      }
+      gbtn.addEventListener('click',function(){
+        q.classList.contains('graded')?reset():grade();
+      });
+    }
+
+    /* ── 서술형/구두: 타이핑 답안 → 모범답안 확인 → 스스로 채점(O/X) ── */
+    function setupText(q,det,ph,label){
+      ph=ph||'여기에 내 답안을 적어보고 모범답안과 비교하세요…';
+      label=label||'모범답안 확인';
+      var idx=state.length; state.push(null);
+      var ta=document.createElement('textarea'); ta.className='answerbox'; ta.rows=3;
+      ta.placeholder=ph;
+      det.parentNode.insertBefore(ta, det);
+      var bar=document.createElement('div'); bar.className='gradebar';
+      det.parentNode.insertBefore(bar, det);
+      function toInitial(){
+        bar.innerHTML='';
+        var gbtn=document.createElement('button'); gbtn.type='button'; gbtn.className='gradebtn';
+        gbtn.textContent=label;
+        gbtn.addEventListener('click',function(){ det.open=true; toSelf(); }); // 모범답안 자동 오픈
+        bar.appendChild(gbtn);
+      }
+      function toSelf(){
+        bar.innerHTML='';
+        var lab=document.createElement('span'); lab.className='selflabel'; lab.textContent='스스로 채점:';
+        var okB=document.createElement('button'); okB.type='button'; okB.className='selfbtn ok'; okB.textContent='✓ 맞았음';
+        var noB=document.createElement('button'); noB.type='button'; noB.className='selfbtn no'; noB.textContent='✕ 아쉬웠음';
+        var again=document.createElement('button'); again.type='button'; again.className='gradebtn'; again.textContent='다시';
+        again.style.marginLeft='4px';
+        [lab,okB,noB,again].forEach(function(el){bar.appendChild(el);});
+        function mark(ok){
+          state[idx]=ok; q.classList.add('graded'); q.classList.toggle('ok',ok); q.classList.toggle('no',!ok);
+          okB.classList.toggle('pick',ok); noB.classList.toggle('pick',!ok); renderScore();
+        }
+        okB.addEventListener('click',function(){mark(true);});
+        noB.addEventListener('click',function(){mark(false);});
+        again.addEventListener('click',function(){
+          det.open=false; q.classList.remove('graded','ok','no'); state[idx]=null; renderScore(); toInitial();
+        });
+      }
+      toInitial();
+    }
+
+    document.querySelectorAll('.q').forEach(function(q){
+      var det=q.querySelector('details');
+      if(!det) return;                                 // 정답/해설 토글이 있는 문항만
+      var choices=q.querySelector('ol.choices');
+      var verdict=q.querySelector('.verdict');
+      var ci=verdict?CIRC.indexOf(verdict.textContent.trim().charAt(0)):-1;
+      if(choices){ if(ci>=0) setupMC(q,det,choices,ci); } // 객관식(정답 키 있을 때만)
+      else setupText(q,det);                             // 서술형/단답/쿼리작성
+    });
+
+    document.querySelectorAll('.oral').forEach(function(o){    // 구두질문
+      var det=o.querySelector('details');
+      if(!det) return;
+      setupText(o,det,'여기에 내 답변을 소리 내어 말하듯 적어보고 모범답변과 비교하세요…','모범답변 확인');
+    });
+
+    buildScore();
+  })();
+</script>

@@ -1,0 +1,455 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Java 기초·OOP · 세트 4 — 자가채점 드릴</title>
+<style>
+  :root{
+    --card:#fffdf7; --line:#e7ddca; --ink:#2f2a22; --muted:#8a7f6c;
+    --brass:#b07d34; --danger:#c0392b;
+    --safe:#3f8f5f; --safe-bg:#eef7f0; --safe-line:#bcdcc6;
+    --slate:#4a5568; --slate-bg:#eef1f5; --chip:#f3ecdd;
+    --mono:ui-monospace,SFMono-Regular,Menlo,"Cascadia Mono","Roboto Mono",monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI","Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+    --paper:#f6f0e3;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --card:#232019; --line:#3b3529; --ink:#ece5d6; --muted:#9a8f7c;
+      --brass:#d3a05a; --danger:#e07a6e;
+      --safe:#7fc79a; --safe-bg:#1d2a22; --safe-line:#2f5340;
+      --slate:#aeb7c4; --slate-bg:#262b33; --chip:#2c2820;
+      --paper:#1a1712;
+    }
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--paper);color:var(--ink);
+    font-family:var(--sans);font-size:16px;line-height:1.6;
+    -webkit-font-smoothing:antialiased}
+  code{font-family:var(--mono);font-size:.9em;background:var(--chip);
+    padding:.1em .38em;border-radius:5px}
+  pre{margin:13px 0 0;background:var(--chip);border:1px solid var(--line);
+    border-radius:9px;padding:13px 15px;overflow-x:auto}
+  pre code{background:none;padding:0;font-size:13px;line-height:1.55;display:block}
+
+  /* 상단 바 + 진행바 */
+  .bar{position:sticky;top:0;z-index:20;display:flex;align-items:center;
+    gap:12px;flex-wrap:wrap;
+    background:color-mix(in srgb,var(--paper) 90%,transparent);
+    backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);padding:11px 20px}
+  .bar .brand{font-family:var(--mono);font-size:12.5px;font-weight:700;
+    color:var(--muted);white-space:nowrap}
+  .bar .brand b{color:var(--ink)}
+  #prog{position:fixed;top:0;left:0;height:3px;width:0;
+    background:var(--brass);z-index:30;transition:width .1s}
+  #toggleAll{font-family:var(--mono);font-size:12px;font-weight:700;
+    cursor:pointer;background:var(--slate);color:#fff;border:0;
+    border-radius:7px;padding:7px 13px;white-space:nowrap}
+  #toggleAll:hover{filter:brightness(1.1)}
+
+  main{max-width:760px;margin:0 auto;padding:26px 20px 80px}
+  header.head{margin:6px 0 26px}
+  .badge{display:inline-block;font-family:var(--mono);font-size:12px;
+    font-weight:700;color:var(--brass);background:var(--chip);
+    border:1px solid var(--line);border-radius:999px;padding:4px 12px}
+  .setno{font-family:var(--mono);font-size:12.5px;color:var(--muted);
+    margin-left:9px}
+  header.head h1{font-size:23px;margin:14px 0 6px;letter-spacing:-.01em}
+  header.head p{margin:0;color:var(--muted);font-size:14px}
+
+  .q,.oral{background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:19px 21px;margin:16px 0;
+    transition:border-color .15s,box-shadow .15s}
+  .qnum{font-family:var(--mono);font-size:11.5px;font-weight:700;
+    color:var(--brass);letter-spacing:.03em}
+  .qtype{font-family:var(--mono);font-size:11px;color:var(--muted);
+    margin-left:7px}
+  .qtext{margin:8px 0 0;font-size:16.5px;font-weight:600;line-height:1.5}
+
+  ol.choices{counter-reset:opt;list-style:none;margin:15px 0 0;padding:0}
+  ol.choices li{counter-increment:opt;position:relative;
+    padding:9px 13px 9px 42px;margin:6px 0;border-radius:8px;
+    font-size:15px;line-height:1.45}
+  ol.choices li::before{content:counter(opt);position:absolute;left:11px;
+    top:50%;transform:translateY(-50%);
+    width:21px;height:21px;border-radius:50%;
+    border:1.5px solid var(--muted);color:var(--muted);
+    font-family:var(--mono);font-size:12px;font-weight:700;
+    display:flex;align-items:center;justify-content:center}
+
+  details{margin-top:14px;border-top:1px dashed var(--line);padding-top:2px}
+  details summary{cursor:pointer;list-style:none;
+    font-family:var(--mono);font-size:12.5px;font-weight:700;
+    color:var(--brass);padding:10px 0 4px}
+  details summary::-webkit-details-marker{display:none}
+  details summary::before{content:"▸ ";}
+  details[open] summary::before{content:"▾ ";}
+  .verdict{font-family:var(--mono);font-weight:700;color:var(--safe);
+    background:var(--safe-bg);border:1px solid var(--safe-line);
+    border-radius:8px;padding:8px 12px;margin:6px 0 0;font-size:14px}
+  .ans{margin:11px 0 2px;font-size:14.5px;line-height:1.68;color:var(--ink)}
+
+  footer.recap{margin:34px 0 0;background:var(--slate-bg);
+    border:1px solid var(--line);border-radius:13px;padding:18px 21px}
+  footer.recap h2{font-size:14px;font-family:var(--mono);
+    margin:0 0 10px;color:var(--slate)}
+  footer.recap ol{margin:0;padding-left:20px}
+  footer.recap li{font-size:14px;line-height:1.6;margin:5px 0}
+
+  /* ── 인터랙티브 채점 ── */
+  #score{font-family:var(--mono);font-size:11px;color:var(--muted);white-space:nowrap;text-align:right;line-height:1.4}
+  #score b{color:var(--ink)} #score .ok{color:var(--safe)} #score .no{color:var(--danger)}
+  ol.choices li.opt{cursor:pointer;border-radius:8px;transition:background .12s,box-shadow .12s;-webkit-tap-highlight-color:transparent}
+  ol.choices li.opt:hover{background:var(--chip)}
+  ol.choices li.sel{background:color-mix(in srgb,var(--brass) 15%,transparent)}
+  ol.choices li.sel::before{border-color:var(--brass);color:#fff;background:var(--brass)}
+  ol.choices li.correct{background:var(--safe-bg)}
+  ol.choices li.correct::before{content:"✓";border-color:var(--safe);color:#fff;background:var(--safe)}
+  ol.choices li.wrong{background:color-mix(in srgb,var(--danger) 13%,transparent)}
+  ol.choices li.wrong::before{content:"✕";border-color:var(--danger);color:#fff;background:var(--danger)}
+  .gradebar{display:flex;align-items:center;gap:11px;margin-top:13px}
+  .gradebar.nudge{animation:shake .32s}
+  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+  .gradebtn{font-family:var(--mono);font-size:12.5px;font-weight:700;cursor:pointer;
+    background:var(--slate);color:#fff;border:0;border-radius:7px;padding:7px 15px;white-space:nowrap}
+  .gradebtn:disabled{opacity:.4;cursor:not-allowed}
+  .gradebtn:not(:disabled):hover{filter:brightness(1.1)}
+  .result{font-family:var(--mono);font-size:13px;font-weight:700;display:inline-flex;align-items:center;gap:5px}
+  .result.ok{color:var(--safe)} .result.no{color:var(--danger)}
+  .q.graded.ok,.oral.graded.ok{border-color:var(--safe-line);box-shadow:0 0 0 1px var(--safe-line)}
+  .q.graded.no,.oral.graded.no{border-color:var(--danger);box-shadow:0 0 0 1px var(--danger)}
+  /* 서술형 타이핑 답안 */
+  .answerbox{display:block;width:100%;margin-top:13px;font-family:var(--sans);font-size:14.5px;line-height:1.65;
+    color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:9px;padding:10px 13px;
+    resize:vertical;min-height:66px}
+  .answerbox:focus{outline:2px solid color-mix(in srgb,var(--brass) 42%,transparent);outline-offset:1px;border-color:var(--brass)}
+  .answerbox::placeholder{color:var(--muted);opacity:.75}
+  .selflabel{font-family:var(--mono);font-size:12px;color:var(--muted)}
+  .selfbtn{font-family:var(--mono);font-size:12px;font-weight:700;cursor:pointer;border-radius:7px;
+    padding:6px 12px;border:1px solid var(--line);background:var(--card);color:var(--ink)}
+  .selfbtn.ok{border-color:var(--safe-line);color:var(--safe)} .selfbtn.ok:hover{background:var(--safe-bg)}
+  .selfbtn.no{border-color:var(--danger);color:var(--danger)} .selfbtn.no:hover{background:color-mix(in srgb,var(--danger) 8%,transparent)}
+  .selfbtn.pick{color:#fff}
+  .selfbtn.ok.pick{background:var(--safe);border-color:var(--safe)}
+  .selfbtn.no.pick{background:var(--danger);border-color:var(--danger)}
+</style>
+
+<div id="prog"></div>
+<div class="bar">
+  <span class="brand"><b>Java</b> 기초·OOP 드릴</span>
+  <button id="toggleAll" type="button">전체 정답 펼치기</button>
+</div>
+
+<main>
+  <header class="head">
+    <span class="badge">Java 기초·OOP</span><span class="setno">세트 4 / 5</span>
+    <h1>예외 처리·equals/hashCode·오토박싱·값 전달</h1>
+    <p>보기를 고른 뒤 <b>채점하기</b>를 누르면 정오답과 해설이 열립니다. 서술·단답·코드읽기는 직접 적어보고 모범답안과 비교해 스스로 채점하세요.</p>
+  </header>
+
+  <!-- Q31 -->
+  <section class="q">
+    <div><span class="qnum">Q31</span><span class="qtype">객관식 · checked vs unchecked 예외</span></div>
+    <p class="qtext">checked 예외와 unchecked 예외의 구분으로 옳은 것은?</p>
+    <ol class="choices">
+      <li>unchecked는 RuntimeException 계열로 컴파일러가 처리를 강제하지 않는다</li>
+      <li>checked는 컴파일러가 검사하지 않는다</li>
+      <li>NullPointerException은 checked 예외다</li>
+      <li>모든 예외는 반드시 try-catch로 처리해야 한다</li>
+    </ol>
+    <details>
+      <summary>정답 확인</summary>
+      <div class="verdict">① unchecked는 RuntimeException 계열로 컴파일러가 처리를 강제하지 않는다</div>
+      <div class="ans">RuntimeException 하위(NPE, IllegalArgumentException 등)는 unchecked라 처리 강제가 없고, IOException 같은 checked는 try-catch나 throws가 필수다. 예외 설계는 장애 로깅·복구 전략과 직결된다.</div>
+    </details>
+  </section>
+
+  <!-- Q32 -->
+  <section class="q">
+    <div><span class="qnum">Q32</span><span class="qtype">객관식 · try-catch-finally</span></div>
+    <p class="qtext">try에서 예외가 발생하고 catch가 이를 처리할 때 finally 블록은?</p>
+    <ol class="choices">
+      <li>실행되지 않는다</li>
+      <li>catch보다 먼저 실행된다</li>
+      <li>catch 실행 후 (return이 있어도) 실행된다</li>
+      <li>예외가 없을 때만 실행된다</li>
+    </ol>
+    <details>
+      <summary>정답 확인</summary>
+      <div class="verdict">③ catch 실행 후 (return이 있어도) 실행된다</div>
+      <div class="ans">finally는 예외 유무나 return과 무관하게 항상 실행된다(System.exit 등 예외 제외). DB 커넥션·파일 스트림 해제를 finally에 두어 자원 누수를 막는다.</div>
+    </details>
+  </section>
+
+  <!-- Q33 -->
+  <section class="q">
+    <div><span class="qnum">Q33</span><span class="qtype">객관식 · throw vs throws</span></div>
+    <p class="qtext">throw와 throws의 차이로 옳은 것은?</p>
+    <ol class="choices">
+      <li>throw는 메서드 선언부에 예외를 명시하고 throws는 예외를 실제로 던진다</li>
+      <li>throw는 예외 객체를 실제로 발생시키고, throws는 메서드가 던질 수 있는 예외를 선언한다</li>
+      <li>둘은 완전히 같다</li>
+      <li>throws는 예외를 잡는(catch) 키워드다</li>
+    </ol>
+    <details>
+      <summary>정답 확인</summary>
+      <div class="verdict">② throw는 예외 객체를 실제로 발생시키고, throws는 메서드가 던질 수 있는 예외를 선언한다</div>
+      <div class="ans">throw는 문장으로 예외를 발생시키고, throws는 선언으로 호출자에게 예외 처리를 위임한다는 통보다. 계층 간 예외 전파 규약을 명확히 해야 SI 공통 모듈에서 장애 원인 추적이 쉽다.</div>
+    </details>
+  </section>
+
+  <!-- Q34 -->
+  <section class="q">
+    <div><span class="qnum">Q34</span><span class="qtype">객관식 · equals/hashCode 계약</span></div>
+    <p class="qtext"><code>equals()</code>를 재정의할 때 <code>hashCode()</code>도 함께 재정의해야 하는 이유는?</p>
+    <ol class="choices">
+      <li>재정의하지 않으면 컴파일 에러가 나기 때문</li>
+      <li>상속을 가능하게 하기 위해서</li>
+      <li>성능 향상만을 위해서</li>
+      <li>equals가 true인 두 객체는 hashCode도 같아야 해시 기반 컬렉션이 올바로 동작하기 때문</li>
+    </ol>
+    <details>
+      <summary>정답 확인</summary>
+      <div class="verdict">④ equals가 true인 두 객체는 hashCode도 같아야 해시 기반 컬렉션이 올바로 동작하기 때문</div>
+      <div class="ans">이 계약을 어기면 HashMap/HashSet에서 같은 객체를 찾지 못하는 버그가 난다. 상품코드·계좌 같은 값 객체를 키로 쓸 때는 반드시 두 메서드를 쌍으로 재정의한다.</div>
+    </details>
+  </section>
+
+  <!-- Q35 -->
+  <section class="q">
+    <div><span class="qnum">Q35</span><span class="qtype">객관식 · 오토박싱</span></div>
+    <p class="qtext"><code>Integer i = 10;</code> 처럼 기본형이 대응하는 래퍼 객체로 자동 변환되는 것을 무엇이라 하는가?</p>
+    <ol class="choices">
+      <li>오토박싱</li>
+      <li>언박싱</li>
+      <li>캐스팅</li>
+      <li>타입 추론</li>
+    </ol>
+    <details>
+      <summary>정답 확인</summary>
+      <div class="verdict">① 오토박싱</div>
+      <div class="ans">기본형에서 래퍼로의 자동 변환이 오토박싱, 반대는 언박싱이다. 편리하지만 반복 루프에서 불필요한 객체가 생성되고 null 언박싱 시 NPE 위험이 있어 대량 연산에는 기본형을 쓴다.</div>
+    </details>
+  </section>
+
+  <!-- Q36 -->
+  <section class="q">
+    <div><span class="qnum">Q36</span><span class="qtype">객관식 · enum</span></div>
+    <p class="qtext">자바 enum에 대한 설명으로 옳은 것은?</p>
+    <ol class="choices">
+      <li>서로 다른 enum 상수는 == 비교가 불가능하다</li>
+      <li>enum은 인터페이스를 구현할 수 없다</li>
+      <li>고정된 상수 집합을 타입 안전하게 표현하며 필드·메서드를 가질 수 있다</li>
+      <li>enum 값은 런타임에 동적으로 추가된다</li>
+    </ol>
+    <details>
+      <summary>정답 확인</summary>
+      <div class="verdict">③ 고정된 상수 집합을 타입 안전하게 표현하며 필드·메서드를 가질 수 있다</div>
+      <div class="ans">enum은 타입 안전한 상수 열거로 switch·== 비교가 가능하고 필드/메서드도 둘 수 있다. 주문상태·회원등급 같은 유한 집합을 문자열 상수 대신 enum으로 두면 오타 버그가 사라진다.</div>
+    </details>
+  </section>
+
+  <!-- Q37 -->
+  <section class="q">
+    <div><span class="qnum">Q37</span><span class="qtype">객관식 · 값/참조 전달</span></div>
+    <p class="qtext">자바의 메서드 인자 전달 방식에 대한 설명으로 옳은 것은?</p>
+    <ol class="choices">
+      <li>기본형은 값으로, 객체는 참조 자체를 전달해 호출자의 참조가 바뀔 수 있다</li>
+      <li>자바는 항상 값에 의한 전달이며 객체는 참조값(주소)의 복사본을 넘긴다</li>
+      <li>모든 인자는 참조로 전달된다</li>
+      <li>배열은 인자로 전달할 수 없다</li>
+    </ol>
+    <details>
+      <summary>정답 확인</summary>
+      <div class="verdict">② 자바는 항상 값에 의한 전달이며 객체는 참조값(주소)의 복사본을 넘긴다</div>
+      <div class="ans">자바는 항상 pass-by-value다. 객체는 참조값을 복사해 넘기므로 메서드 안에서 객체 내부 필드는 바꿀 수 있어도 호출자의 참조 자체를 다른 객체로 바꾸지는 못한다. 이 오해가 "왜 값이 안 바뀌지" 디버깅 시간을 잡아먹는다.</div>
+    </details>
+  </section>
+
+  <!-- Q38 -->
+  <section class="q">
+    <div><span class="qnum">Q38</span><span class="qtype">코드읽기 · finally와 return</span></div>
+    <p class="qtext">다음 메서드의 반환값을 쓰시오.</p>
+    <pre><code>int f() {
+    try { return 1; }
+    finally { return 2; }
+}</code></pre>
+    <details>
+      <summary>모범답안 확인</summary>
+      <div class="verdict">모범답안 · 2</div>
+      <div class="ans">finally의 return이 try의 return을 덮어써 최종적으로 2가 반환된다. finally에 return을 두면 예외까지 삼켜 장애를 숨기므로 실무에서는 금기로 다룬다.</div>
+    </details>
+  </section>
+
+  <!-- Q39 -->
+  <section class="q">
+    <div><span class="qnum">Q39</span><span class="qtype">단답 · try-with-resources</span></div>
+    <p class="qtext">try-with-resources 구문의 목적을 한 줄로 쓰시오.</p>
+    <details>
+      <summary>모범답안 확인</summary>
+      <div class="verdict">모범답안</div>
+      <div class="ans">try 괄호 안에 선언한 (AutoCloseable) 자원을 블록이 끝날 때 자동으로 close 해주어 자원 누수를 방지한다.<br><br>finally에서 수동으로 close하던 상용구를 대체한다. DB 커넥션·스트림 누수는 운영 서버 다운의 흔한 원인이라 이 구문 사용이 권장된다.</div>
+    </details>
+  </section>
+
+  <!-- Q40 -->
+  <section class="q">
+    <div><span class="qnum">Q40</span><span class="qtype">서술형 · 예외 처리 전략</span></div>
+    <p class="qtext">실무에서 checked 예외를 만났을 때의 처리 원칙을 "복구 가능/불가능" 관점에서 설명하시오.</p>
+    <details>
+      <summary>모범답안 확인</summary>
+      <div class="verdict">모범답안</div>
+      <div class="ans">현재 계층에서 복구가 가능하면 try-catch로 처리(재시도·대체값 반환)하고, 복구가 불가능하면 상위로 throws 전파하거나 의미 있는 런타임 예외로 감싸(wrapping) 던진다. 어느 경우든 예외를 빈 catch로 삼키지 않고 반드시 로깅한다.<br><br>채점 포인트는 복구 여부에 따른 처리/전파 결정, 로깅, 예외 무시 금지다. 고객 장애 대응에서 원인 추적 로그의 유무가 처리 시간을 좌우한다.</div>
+    </details>
+  </section>
+
+  <footer class="recap">
+    <h2>이 세트 우선복습 3줄</h2>
+    <ol>
+      <li><b>checked vs unchecked</b> — RuntimeException 계열은 unchecked라 처리 강제가 없고, IOException 같은 checked는 try-catch/throws가 필수. NPE는 unchecked라는 점이 함정.</li>
+      <li><b>finally는 무조건 실행</b> — 예외·return과 무관하게 항상 돈다. 단 finally에 <code>return</code>을 두면 try의 반환값을 덮어쓰고 예외까지 삼켜 장애를 숨기므로 금기.</li>
+      <li><b>equals/hashCode 쌍 재정의</b> — equals가 true면 hashCode도 같아야 한다. 하나만 재정의하면 HashMap/HashSet에서 값 객체를 못 찾는 버그가 난다.</li>
+    </ol>
+  </footer>
+</main>
+
+<script>
+  (function(){
+    /* 스크롤 진행바 */
+    var prog=document.getElementById('prog');
+    var doc=document.documentElement;
+    function onScroll(){
+      var pct=doc.scrollTop/(doc.scrollHeight-doc.clientHeight)*100;
+      prog.style.width=(pct||0)+'%';
+    }
+    document.addEventListener('scroll',onScroll,{passive:true}); onScroll();
+
+    /* 전체 정답 펼치기 */
+    var btn=document.getElementById('toggleAll'), open=false;
+    btn.addEventListener('click',function(){
+      open=!open;
+      document.querySelectorAll('details').forEach(function(d){d.open=open;});
+      btn.textContent=open?'전체 정답 접기':'전체 정답 펼치기';
+    });
+
+    /* ── 채점 상태/점수판 ── 정답은 .verdict 앞머리의 원문자(①②③④)에서 자동 추출 ── */
+    var CIRC='①②③④⑤⑥⑦⑧⑨⑩';
+    var state=[];   // 문항별 채점 결과: true(정답)/false(오답)/null(미채점)
+    var scoreEl;
+    function renderScore(){
+      var total=state.length;
+      var done=state.filter(function(s){return s!==null;}).length;
+      var correct=state.filter(function(s){return s===true;}).length;
+      scoreEl.innerHTML='채점 <b>'+done+'/'+total+'</b>'
+        +'<br>정답 <span class="ok">'+correct+'</span> · 오답 <span class="no">'+(done-correct)+'</span>';
+    }
+    function buildScore(){
+      scoreEl=document.createElement('div'); scoreEl.id='score';
+      var right=document.createElement('div');
+      right.style.cssText='display:flex;align-items:center;gap:12px';
+      var barEl=document.querySelector('.bar');
+      barEl.appendChild(right);
+      right.appendChild(scoreEl); right.appendChild(btn); // 점수판 + 기존 버튼을 우측 묶음으로
+      renderScore();
+    }
+
+    /* ── 객관식: 보기 클릭 → 채점하기 ── */
+    function setupMC(q,det,choices,ci){
+      var lis=Array.prototype.slice.call(choices.querySelectorAll('li'));
+      if(ci>=lis.length) return;
+      var idx=state.length; state.push(null);
+      var bar=document.createElement('div'); bar.className='gradebar';
+      var gbtn=document.createElement('button'); gbtn.type='button'; gbtn.className='gradebtn';
+      gbtn.textContent='채점하기'; gbtn.disabled=true;
+      var res=document.createElement('span'); res.className='result';
+      bar.appendChild(gbtn); bar.appendChild(res);
+      det.parentNode.insertBefore(bar, det);
+      lis.forEach(function(li){
+        li.classList.add('opt');
+        li.addEventListener('click',function(){
+          if(q.classList.contains('graded')) return; // 채점 후엔 잠금
+          lis.forEach(function(x){x.classList.remove('sel');});
+          li.classList.add('sel'); gbtn.disabled=false;
+        });
+      });
+      function reset(){
+        lis.forEach(function(x){x.classList.remove('sel','correct','wrong');});
+        q.classList.remove('graded','ok','no');
+        det.open=false; res.textContent=''; res.className='result';
+        gbtn.textContent='채점하기'; gbtn.disabled=true;
+        state[idx]=null; renderScore();
+      }
+      function grade(){
+        var sel=choices.querySelector('li.sel');
+        if(!sel){ bar.classList.add('nudge'); setTimeout(function(){bar.classList.remove('nudge');},350); return; }
+        var ok=lis.indexOf(sel)===ci;
+        lis[ci].classList.add('correct');
+        if(!ok) sel.classList.add('wrong');
+        q.classList.add('graded', ok?'ok':'no');
+        det.open=true;                                // 정답보기 토글 자동 오픈
+        res.textContent=ok?'✓ 정답':'✕ 오답'; res.className='result '+(ok?'ok':'no');
+        gbtn.textContent='다시 풀기';
+        state[idx]=ok; renderScore();
+      }
+      gbtn.addEventListener('click',function(){
+        q.classList.contains('graded')?reset():grade();
+      });
+    }
+
+    /* ── 서술형/구두: 타이핑 답안 → 모범답안 확인 → 스스로 채점(O/X) ── */
+    function setupText(q,det,ph,label){
+      ph=ph||'여기에 내 답안을 적어보고 모범답안과 비교하세요…';
+      label=label||'모범답안 확인';
+      var idx=state.length; state.push(null);
+      var ta=document.createElement('textarea'); ta.className='answerbox'; ta.rows=3;
+      ta.placeholder=ph;
+      det.parentNode.insertBefore(ta, det);
+      var bar=document.createElement('div'); bar.className='gradebar';
+      det.parentNode.insertBefore(bar, det);
+      function toInitial(){
+        bar.innerHTML='';
+        var gbtn=document.createElement('button'); gbtn.type='button'; gbtn.className='gradebtn';
+        gbtn.textContent=label;
+        gbtn.addEventListener('click',function(){ det.open=true; toSelf(); }); // 모범답안 자동 오픈
+        bar.appendChild(gbtn);
+      }
+      function toSelf(){
+        bar.innerHTML='';
+        var lab=document.createElement('span'); lab.className='selflabel'; lab.textContent='스스로 채점:';
+        var okB=document.createElement('button'); okB.type='button'; okB.className='selfbtn ok'; okB.textContent='✓ 맞았음';
+        var noB=document.createElement('button'); noB.type='button'; noB.className='selfbtn no'; noB.textContent='✕ 아쉬웠음';
+        var again=document.createElement('button'); again.type='button'; again.className='gradebtn'; again.textContent='다시';
+        again.style.marginLeft='4px';
+        [lab,okB,noB,again].forEach(function(el){bar.appendChild(el);});
+        function mark(ok){
+          state[idx]=ok; q.classList.add('graded'); q.classList.toggle('ok',ok); q.classList.toggle('no',!ok);
+          okB.classList.toggle('pick',ok); noB.classList.toggle('pick',!ok); renderScore();
+        }
+        okB.addEventListener('click',function(){mark(true);});
+        noB.addEventListener('click',function(){mark(false);});
+        again.addEventListener('click',function(){
+          det.open=false; q.classList.remove('graded','ok','no'); state[idx]=null; renderScore(); toInitial();
+        });
+      }
+      toInitial();
+    }
+
+    document.querySelectorAll('.q').forEach(function(q){
+      var det=q.querySelector('details');
+      if(!det) return;                                 // 정답/해설 토글이 있는 문항만
+      var choices=q.querySelector('ol.choices');
+      var verdict=q.querySelector('.verdict');
+      var ci=verdict?CIRC.indexOf(verdict.textContent.trim().charAt(0)):-1;
+      if(choices){ if(ci>=0) setupMC(q,det,choices,ci); } // 객관식(정답 키 있을 때만)
+      else setupText(q,det);                             // 서술형/단답/쿼리작성
+    });
+
+    document.querySelectorAll('.oral').forEach(function(o){    // 구두질문
+      var det=o.querySelector('details');
+      if(!det) return;
+      setupText(o,det,'여기에 내 답변을 소리 내어 말하듯 적어보고 모범답변과 비교하세요…','모범답변 확인');
+    });
+
+    buildScore();
+  })();
+</script>

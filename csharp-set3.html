@@ -1,0 +1,462 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>C#/.NET (Java와 대비) · 세트 3 — 자가채점 드릴</title>
+<style>
+  :root{
+    --card:#fffdf7; --line:#e7ddca; --ink:#2f2a22; --muted:#8a7f6c;
+    --brass:#b07d34; --danger:#c0392b;
+    --safe:#3f8f5f; --safe-bg:#eef7f0; --safe-line:#bcdcc6;
+    --slate:#4a5568; --slate-bg:#eef1f5; --chip:#f3ecdd;
+    --mono:ui-monospace,SFMono-Regular,Menlo,"Cascadia Mono","Roboto Mono",monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI","Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+    --paper:#f6f0e3;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --card:#232019; --line:#3b3529; --ink:#ece5d6; --muted:#9a8f7c;
+      --brass:#d3a05a; --danger:#e07a6e;
+      --safe:#7fc79a; --safe-bg:#1d2a22; --safe-line:#2f5340;
+      --slate:#aeb7c4; --slate-bg:#262b33; --chip:#2c2820;
+      --paper:#1a1712;
+    }
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--paper);color:var(--ink);
+    font-family:var(--sans);font-size:16px;line-height:1.6;
+    -webkit-font-smoothing:antialiased}
+  code{font-family:var(--mono);font-size:.9em;background:var(--chip);
+    padding:.1em .38em;border-radius:5px}
+  pre{margin:13px 0 0;background:var(--chip);border:1px solid var(--line);
+    border-radius:9px;padding:13px 15px;overflow-x:auto}
+  pre code{background:none;padding:0;font-size:13px;line-height:1.55;display:block}
+
+  /* 상단 바 + 진행바 */
+  .bar{position:sticky;top:0;z-index:20;display:flex;align-items:center;
+    gap:12px;flex-wrap:wrap;
+    background:color-mix(in srgb,var(--paper) 90%,transparent);
+    backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);padding:11px 20px}
+  .bar .brand{font-family:var(--mono);font-size:12.5px;font-weight:700;
+    color:var(--muted);white-space:nowrap}
+  .bar .brand b{color:var(--ink)}
+  #prog{position:fixed;top:0;left:0;height:3px;width:0;
+    background:var(--brass);z-index:30;transition:width .1s}
+  #toggleAll{font-family:var(--mono);font-size:12px;font-weight:700;
+    cursor:pointer;background:var(--slate);color:#fff;border:0;
+    border-radius:7px;padding:7px 13px;white-space:nowrap}
+  #toggleAll:hover{filter:brightness(1.1)}
+
+  main{max-width:760px;margin:0 auto;padding:26px 20px 80px}
+  header.head{margin:6px 0 26px}
+  .badge{display:inline-block;font-family:var(--mono);font-size:12px;
+    font-weight:700;color:var(--brass);background:var(--chip);
+    border:1px solid var(--line);border-radius:999px;padding:4px 12px}
+  .setno{font-family:var(--mono);font-size:12.5px;color:var(--muted);
+    margin-left:9px}
+  header.head h1{font-size:23px;margin:14px 0 6px;letter-spacing:-.01em}
+  header.head p{margin:0;color:var(--muted);font-size:14px}
+
+  .q,.oral{background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:19px 21px;margin:16px 0;
+    transition:border-color .15s,box-shadow .15s}
+  .qnum{font-family:var(--mono);font-size:11.5px;font-weight:700;
+    color:var(--brass);letter-spacing:.03em}
+  .qtype{font-family:var(--mono);font-size:11px;color:var(--muted);
+    margin-left:7px}
+  .qtext{margin:8px 0 0;font-size:16.5px;font-weight:600;line-height:1.5}
+
+  ol.choices{counter-reset:opt;list-style:none;margin:15px 0 0;padding:0}
+  ol.choices li{counter-increment:opt;position:relative;
+    padding:9px 13px 9px 42px;margin:6px 0;border-radius:8px;
+    font-size:15px;line-height:1.45}
+  ol.choices li::before{content:counter(opt);position:absolute;left:11px;
+    top:50%;transform:translateY(-50%);
+    width:21px;height:21px;border-radius:50%;
+    border:1.5px solid var(--muted);color:var(--muted);
+    font-family:var(--mono);font-size:12px;font-weight:700;
+    display:flex;align-items:center;justify-content:center}
+
+  details{margin-top:14px;border-top:1px dashed var(--line);padding-top:2px}
+  details summary{cursor:pointer;list-style:none;
+    font-family:var(--mono);font-size:12.5px;font-weight:700;
+    color:var(--brass);padding:10px 0 4px}
+  details summary::-webkit-details-marker{display:none}
+  details summary::before{content:"▸ ";}
+  details[open] summary::before{content:"▾ ";}
+  .verdict{font-family:var(--mono);font-weight:700;color:var(--safe);
+    background:var(--safe-bg);border:1px solid var(--safe-line);
+    border-radius:8px;padding:8px 12px;margin:6px 0 0;font-size:14px}
+  .ans{margin:11px 0 2px;font-size:14.5px;line-height:1.68;color:var(--ink)}
+
+  footer.recap{margin:34px 0 0;background:var(--slate-bg);
+    border:1px solid var(--line);border-radius:13px;padding:18px 21px}
+  footer.recap h2{font-size:14px;font-family:var(--mono);
+    margin:0 0 10px;color:var(--slate)}
+  footer.recap ol{margin:0;padding-left:20px}
+  footer.recap li{font-size:14px;line-height:1.6;margin:5px 0}
+
+  /* ── 인터랙티브 채점 ── */
+  #score{font-family:var(--mono);font-size:11px;color:var(--muted);white-space:nowrap;text-align:right;line-height:1.4}
+  #score b{color:var(--ink)} #score .ok{color:var(--safe)} #score .no{color:var(--danger)}
+  ol.choices li.opt{cursor:pointer;border-radius:8px;transition:background .12s,box-shadow .12s;-webkit-tap-highlight-color:transparent}
+  ol.choices li.opt:hover{background:var(--chip)}
+  ol.choices li.sel{background:color-mix(in srgb,var(--brass) 15%,transparent)}
+  ol.choices li.sel::before{border-color:var(--brass);color:#fff;background:var(--brass)}
+  ol.choices li.correct{background:var(--safe-bg)}
+  ol.choices li.correct::before{content:"✓";border-color:var(--safe);color:#fff;background:var(--safe)}
+  ol.choices li.wrong{background:color-mix(in srgb,var(--danger) 13%,transparent)}
+  ol.choices li.wrong::before{content:"✕";border-color:var(--danger);color:#fff;background:var(--danger)}
+  .gradebar{display:flex;align-items:center;gap:11px;margin-top:13px}
+  .gradebar.nudge{animation:shake .32s}
+  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+  .gradebtn{font-family:var(--mono);font-size:12.5px;font-weight:700;cursor:pointer;
+    background:var(--slate);color:#fff;border:0;border-radius:7px;padding:7px 15px;white-space:nowrap}
+  .gradebtn:disabled{opacity:.4;cursor:not-allowed}
+  .gradebtn:not(:disabled):hover{filter:brightness(1.1)}
+  .result{font-family:var(--mono);font-size:13px;font-weight:700;display:inline-flex;align-items:center;gap:5px}
+  .result.ok{color:var(--safe)} .result.no{color:var(--danger)}
+  .q.graded.ok,.oral.graded.ok{border-color:var(--safe-line);box-shadow:0 0 0 1px var(--safe-line)}
+  .q.graded.no,.oral.graded.no{border-color:var(--danger);box-shadow:0 0 0 1px var(--danger)}
+  /* 서술형 타이핑 답안 */
+  .answerbox{display:block;width:100%;margin-top:13px;font-family:var(--sans);font-size:14.5px;line-height:1.65;
+    color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:9px;padding:10px 13px;
+    resize:vertical;min-height:66px}
+  .answerbox:focus{outline:2px solid color-mix(in srgb,var(--brass) 42%,transparent);outline-offset:1px;border-color:var(--brass)}
+  .answerbox::placeholder{color:var(--muted);opacity:.75}
+  .selflabel{font-family:var(--mono);font-size:12px;color:var(--muted)}
+  .selfbtn{font-family:var(--mono);font-size:12px;font-weight:700;cursor:pointer;border-radius:7px;
+    padding:6px 12px;border:1px solid var(--line);background:var(--card);color:var(--ink)}
+  .selfbtn.ok{border-color:var(--safe-line);color:var(--safe)} .selfbtn.ok:hover{background:var(--safe-bg)}
+  .selfbtn.no{border-color:var(--danger);color:var(--danger)} .selfbtn.no:hover{background:color-mix(in srgb,var(--danger) 8%,transparent)}
+  .selfbtn.pick{color:#fff}
+  .selfbtn.ok.pick{background:var(--safe);border-color:var(--safe)}
+  .selfbtn.no.pick{background:var(--danger);border-color:var(--danger)}
+</style>
+
+<div id="prog"></div>
+<div class="bar">
+  <span class="brand"><b>C#/.NET</b> (Java 대비) 드릴</span>
+  <button id="toggleAll" type="button">전체 정답 펼치기</button>
+</div>
+
+<main>
+  <header class="head">
+    <span class="badge">C#/.NET</span><span class="setno">세트 3 / 5</span>
+    <h1>LINQ·델리게이트·제네릭부터 박싱·동등성까지 (Java 대비)</h1>
+    <p>보기를 고른 뒤 <b>채점하기</b>를 누르면 정오답과 해설이 열립니다. 서술·단답·코드읽기는 직접 적어보고 모범답안과 비교해 스스로 채점하세요.</p>
+  </header>
+
+  <!-- Q21 -->
+  <section class="q">
+    <div><span class="qnum">Q21</span><span class="qtype">객관식 · LINQ vs Stream</span></div>
+    <p class="qtext">자바 Stream API와 C# LINQ 대비로 옳은 것은?</p>
+    <ol class="choices">
+      <li>LINQ는 자바 Stream과 달리 SQL 데이터베이스에서만 동작하고 메모리 컬렉션엔 못 쓴다</li>
+      <li>자바 <code>stream().filter().map()</code>에 대응해 C#은 LINQ의 <code>Where().Select()</code>(또는 쿼리식)로 컬렉션을 선언적으로 처리한다</li>
+      <li>C#에는 스트림형 컬렉션 처리가 없어 항상 for문으로만 다룬다</li>
+      <li>자바 Stream은 지연 실행이지만 LINQ는 반드시 즉시 실행된다</li>
+    </ol>
+    <details>
+      <summary>정답 확인</summary>
+      <div class="verdict">② 자바 stream().filter().map() ↔ C# LINQ의 Where().Select()</div>
+      <div class="ans">자바 Stream의 filter/map/collect는 C# LINQ의 Where/Select/ToList(또는 <code>from ... where ... select</code> 쿼리식)에 대응한다. 둘 다 지연 실행 성향을 갖는다. 고객사 데이터 집계·변환 로직을 for문 대신 LINQ로 쓰면 의도가 드러나 유지보수가 쉬워진다.</div>
+    </details>
+  </section>
+
+  <!-- Q22 -->
+  <section class="q">
+    <div><span class="qnum">Q22</span><span class="qtype">객관식 · 델리게이트</span></div>
+    <p class="qtext">메서드를 값처럼 전달하는 기능의 자바↔C# 대비로 옳은 것은?</p>
+    <ol class="choices">
+      <li>자바는 함수형 인터페이스(예: Function, Runnable)+람다로, C#은 델리게이트(<code>Func&lt;&gt;</code>, <code>Action&lt;&gt;</code>)로 메서드를 참조·전달한다</li>
+      <li>C#에는 메서드를 전달하는 수단이 없어 항상 인터페이스로만 콜백을 구현한다</li>
+      <li>델리게이트는 자바 키워드이고 C#은 함수형 인터페이스만 쓴다</li>
+      <li>자바 람다는 델리게이트 타입이라 C#과 문법이 완전히 같다</li>
+    </ol>
+    <details>
+      <summary>정답 확인</summary>
+      <div class="verdict">① 자바 함수형 인터페이스+람다 ↔ C# 델리게이트(Func/Action)</div>
+      <div class="ans">자바는 함수형 인터페이스(Function/Consumer/Runnable)에 람다를 대입해 메서드를 값처럼 다루고, C#은 델리게이트 타입(대표적으로 <code>Func&lt;&gt;</code>, <code>Action&lt;&gt;</code>)으로 같은 일을 한다. 개념은 "메서드를 담는 타입 안전한 참조"로 같다. 이벤트 콜백·전략 주입에 쓰여 결제·검증 로직을 유연하게 갈아끼운다.</div>
+    </details>
+  </section>
+
+  <!-- Q23 -->
+  <section class="q">
+    <div><span class="qnum">Q23</span><span class="qtype">객관식 · 이벤트 event</span></div>
+    <p class="qtext">C#의 <code>event</code> 키워드에 대한 자바 대비 설명으로 옳은 것은?</p>
+    <ol class="choices">
+      <li>자바에는 이벤트/리스너 개념이 전혀 없다</li>
+      <li>C#의 event는 외부에서 자유롭게 호출(invoke)할 수 있어 캡슐화가 없다</li>
+      <li>event는 자바 키워드이고 C#은 Observer를 직접 구현해야만 한다</li>
+      <li>자바는 리스너 인터페이스+addXxxListener 패턴으로 이벤트를 구현하지만, C#은 delegate 기반 event 키워드로 언어 차원에서 발행/구독을 지원한다</li>
+    </ol>
+    <details>
+      <summary>정답 확인</summary>
+      <div class="verdict">④ 자바 리스너+addXxxListener ↔ C# delegate 기반 event 키워드</div>
+      <div class="ans">자바는 리스너 인터페이스 + addActionListener 같은 관례로 옵저버 패턴을 구현하지만, C#은 delegate 위에 event 키워드로 발행/구독을 언어가 직접 지원한다. event는 외부에서 <code>+=</code> / <code>-=</code>만 되고 직접 호출은 선언 클래스 내부로 제한돼 캡슐화된다. UI/알림·상태 변경 통지 같은 이벤트 주도 로직에서 결합도를 낮춘다.</div>
+    </details>
+  </section>
+
+  <!-- Q24 -->
+  <section class="q">
+    <div><span class="qnum">Q24</span><span class="qtype">객관식 · using/IDisposable</span></div>
+    <p class="qtext">자원 자동 해제의 자바↔C# 대비로 옳은 것은?</p>
+    <ol class="choices">
+      <li>C#은 자원 해제를 GC에만 맡겨 명시적 해제 구문이 없다</li>
+      <li>IDisposable은 자바 인터페이스이고 C#은 AutoCloseable을 구현한다</li>
+      <li>자바 try-with-resources(AutoCloseable)에 대응해 C#은 using 문(IDisposable)으로 블록 종료 시 Dispose를 자동 호출한다</li>
+      <li>using은 자바 키워드이고 C#은 try-with-resources를 그대로 쓴다</li>
+    </ol>
+    <details>
+      <summary>정답 확인</summary>
+      <div class="verdict">③ 자바 try-with-resources(AutoCloseable) ↔ C# using 문(IDisposable)</div>
+      <div class="ans">자바 try-with-resources는 <code>AutoCloseable.close()</code>를, C# using 문은 <code>IDisposable.Dispose()</code>를 블록 종료 시 자동 호출한다. 둘 다 예외가 나도 확실히 해제한다. DB 커넥션·파일·스트림을 다루는 SI 코드에서 using을 빼먹으면 커넥션 누수로 운영 장애가 난다.</div>
+    </details>
+  </section>
+
+  <!-- Q25 -->
+  <section class="q">
+    <div><span class="qnum">Q25</span><span class="qtype">객관식 · 제네릭 소거 vs reified</span></div>
+    <p class="qtext">제네릭의 런타임 타입 정보 처리에서 자바↔C# 차이로 옳은 것은?</p>
+    <ol class="choices">
+      <li>C#도 자바처럼 타입 소거라 런타임에 <code>List&lt;int&gt;</code>와 <code>List&lt;string&gt;</code>을 구분 못 한다</li>
+      <li>자바는 타입 소거(erasure)로 런타임에 타입 인자가 지워지지만, C#은 제네릭 타입 정보를 런타임까지 보존(reified)한다</li>
+      <li>자바는 타입을 보존하고 C#이 소거하는 정반대 구조다</li>
+      <li>두 언어 모두 제네릭이 순수 문법 설탕이라 런타임엔 존재하지 않는다</li>
+    </ol>
+    <details>
+      <summary>정답 확인</summary>
+      <div class="verdict">② 자바 타입 소거(erasure) ↔ C# reified(런타임 보존)</div>
+      <div class="ans">자바 제네릭은 타입 소거라 런타임에 <code>List&lt;String&gt;</code>이 그냥 List가 되지만, C#은 reified 제네릭이라 <code>typeof(T)</code>로 런타임 타입을 알 수 있고 <code>new T[]</code>도 가능하다. 그래서 C#은 자바에서 못 하는 제네릭 리플렉션·인스턴스화가 된다. 공용 프레임워크 코드에서 이 차이를 알아야 이관 시 리플렉션 로직이 깨지지 않는다.</div>
+    </details>
+  </section>
+
+  <!-- Q26 -->
+  <section class="q">
+    <div><span class="qnum">Q26</span><span class="qtype">객관식 · boxing/unboxing</span></div>
+    <p class="qtext">값 타입과 객체 간 변환의 자바↔C# 대비로 옳은 것은?</p>
+    <ol class="choices">
+      <li>자바 오토박싱(int↔Integer)에 대응해 C#은 값 형식↔object 변환을 박싱/언박싱이라 부르며, 둘 다 힙 할당 비용이 든다</li>
+      <li>C#에는 박싱 개념이 없어 값 형식과 object 간 변환이 무비용이다</li>
+      <li>자바 오토박싱은 힙을 안 쓰지만 C# 박싱만 힙을 쓴다</li>
+      <li>박싱은 자바 전용 용어이고 C#은 캐스팅이라 부르며 비용이 없다</li>
+    </ol>
+    <details>
+      <summary>정답 확인</summary>
+      <div class="verdict">① 자바 오토박싱(int↔Integer) ↔ C# 박싱/언박싱, 둘 다 힙 비용</div>
+      <div class="ans">자바가 int↔Integer를 오토박싱하듯, C#은 값 형식을 object(또는 인터페이스)로 담을 때 박싱, 되꺼낼 때 언박싱하며 힙 할당·복사 비용이 든다. 둘 다 반복문 안 대량 박싱은 성능 저하다. 그래서 두 언어 모두 제네릭 컬렉션(<code>List&lt;T&gt;</code>)으로 박싱을 피한다. 대량 통계 처리에서 박싱 남발이 GC 압박의 흔한 원인이다.</div>
+    </details>
+  </section>
+
+  <!-- Q27 -->
+  <section class="q">
+    <div><span class="qnum">Q27</span><span class="qtype">객관식 · StringBuilder</span></div>
+    <p class="qtext">문자열 누적 조작 도구의 자바↔C# 대비로 옳은 것은?</p>
+    <ol class="choices">
+      <li>C#에는 StringBuilder가 없어 항상 string + string으로만 연결한다</li>
+      <li>C# StringBuilder는 불변이라 자바 String과 동일하다</li>
+      <li>자바 StringBuffer가 C#의 기본 string 타입과 같은 것이다</li>
+      <li>자바 StringBuilder(비동기)/StringBuffer(동기)에 대응해 C#은 StringBuilder로 가변 문자열 누적을 처리한다</li>
+    </ol>
+    <details>
+      <summary>정답 확인</summary>
+      <div class="verdict">④ 자바 StringBuilder/StringBuffer ↔ C# StringBuilder(가변 누적)</div>
+      <div class="ans">자바는 단일 스레드용 StringBuilder와 동기화된 StringBuffer로 나뉘지만, C#은 StringBuilder 하나로 가변 문자열 누적을 처리한다(스레드 안전이 필요하면 별도 동기화). 반복 연결에서 불변 string 대신 이걸 써야 O(n) 재할당을 피한다. 대량 리포트/쿼리 문자열 생성 배치에서 성능 핵심 도구다.</div>
+    </details>
+  </section>
+
+  <!-- Q28 -->
+  <section class="q">
+    <div><span class="qnum">Q28</span><span class="qtype">객관식 · equals/GetHashCode</span></div>
+    <p class="qtext">객체 동등성 비교 재정의의 자바↔C# 대비로 옳은 것은?</p>
+    <ol class="choices">
+      <li>C#은 GetHashCode만 재정의하면 되고 Equals는 재정의할 필요가 없다</li>
+      <li>C#은 <code>==</code> 연산자만 있으면 되고 Equals 개념 자체가 없다</li>
+      <li>자바는 equals()/hashCode()를 함께 재정의하고, C#은 Equals()/GetHashCode()를 함께 재정의한다(둘 다 쌍으로 맞춰야 함)</li>
+      <li>자바 equals와 C#의 <code>==</code> 는 항상 값 비교로 완전히 동일하게 동작한다</li>
+    </ol>
+    <details>
+      <summary>정답 확인</summary>
+      <div class="verdict">③ 자바 equals()/hashCode() ↔ C# Equals()/GetHashCode() (쌍으로 재정의)</div>
+      <div class="ans">자바 equals()/hashCode()에 대응하는 C#은 Equals()/GetHashCode()이며, 둘 다 논리적 동등성과 해시 기반 컬렉션(HashSet/Dictionary)의 정합을 위해 쌍으로 재정의해야 한다. C#은 추가로 <code>==</code> 연산자 오버로드도 고려한다. 도메인 키(고객ID 등)로 중복 제거·조회할 때 이 쌍을 어기면 컬렉션이 오작동한다.</div>
+    </details>
+  </section>
+
+  <!-- Q29 -->
+  <section class="q">
+    <div><span class="qnum">Q29</span><span class="qtype">코드읽기 · LINQ 결과</span></div>
+    <p class="qtext">다음 C# LINQ 코드의 출력은? 자바 Stream filter/map/collect와 대비하며 읽어라.</p>
+    <pre><code>int[] nums = { 1, 2, 3, 4, 5, 6 };
+var result = nums.Where(n =&gt; n % 2 == 0)
+                 .Select(n =&gt; n * 10)
+                 .ToList();
+Console.WriteLine(string.Join(",", result));</code></pre>
+    <details>
+      <summary>모범답안 확인</summary>
+      <div class="verdict">모범답안 · 20,40,60</div>
+      <div class="ans">자바로 치면 <code>stream().filter(n-&gt;n%2==0).map(n-&gt;n*10).collect(...)</code>와 같다. Where로 짝수(2,4,6)만 남기고 Select로 각각 10배 해 20,40,60을 만든다. <code>ToList()</code>에서 실제 실행(구체화)된다. 데이터 필터+변환 파이프라인을 선언적으로 표현하는 실무 전형이다.</div>
+    </details>
+  </section>
+
+  <!-- Q30 -->
+  <section class="q">
+    <div><span class="qnum">Q30</span><span class="qtype">단답 · null 병합 ??</span></div>
+    <p class="qtext">자바에서 <code>name != null ? name : "익명"</code>처럼 쓰는 null 대체를, C#의 null 병합 연산자로 간결하게 쓰시오.</p>
+    <details>
+      <summary>모범답안 확인</summary>
+      <div class="verdict">모범답안 · name ?? "익명"</div>
+      <div class="ans"><code>name ?? "익명"</code> — 자바는 삼항 연산자/Optional.orElse, C#은 <code>??</code> 연산자를 쓴다.<br><br>자바는 삼항 연산자나 <code>Optional.orElse("익명")</code>로 null 대체를 하고, C#은 <code>name ?? "익명"</code>으로 왼쪽이 null이면 오른쪽을 반환한다. 대입 단축형 <code>??=</code>도 있다. DB나 외부 연동에서 들어온 null 값을 기본값으로 방어할 때 코드가 짧고 안전해진다.</div>
+    </details>
+  </section>
+
+  <footer class="recap">
+    <h2>이 세트 우선복습 3줄</h2>
+    <ol>
+      <li><b>제네릭 소거 vs reified</b> — 자바는 타입 소거라 런타임에 <code>List&lt;T&gt;</code>의 T가 지워지지만, C#은 reified라 <code>typeof(T)</code>·<code>new T[]</code>가 된다. 리플렉션 이관의 함정.</li>
+      <li><b>using / IDisposable</b> — 자바 try-with-resources(AutoCloseable) ↔ C# using 문(IDisposable.Dispose). 빼먹으면 DB 커넥션 누수로 장애.</li>
+      <li><b>Equals/GetHashCode는 쌍</b> — 자바 equals()/hashCode()처럼 C#도 Equals()/GetHashCode()를 <em>함께</em> 재정의해야 HashSet/Dictionary가 정상 동작한다.</li>
+    </ol>
+  </footer>
+</main>
+
+<script>
+  (function(){
+    /* 스크롤 진행바 */
+    var prog=document.getElementById('prog');
+    var doc=document.documentElement;
+    function onScroll(){
+      var pct=doc.scrollTop/(doc.scrollHeight-doc.clientHeight)*100;
+      prog.style.width=(pct||0)+'%';
+    }
+    document.addEventListener('scroll',onScroll,{passive:true}); onScroll();
+
+    /* 전체 정답 펼치기 */
+    var btn=document.getElementById('toggleAll'), open=false;
+    btn.addEventListener('click',function(){
+      open=!open;
+      document.querySelectorAll('details').forEach(function(d){d.open=open;});
+      btn.textContent=open?'전체 정답 접기':'전체 정답 펼치기';
+    });
+
+    /* ── 채점 상태/점수판 ── 정답은 .verdict 앞머리의 원문자(①②③④)에서 자동 추출 ── */
+    var CIRC='①②③④⑤⑥⑦⑧⑨⑩';
+    var state=[];   // 문항별 채점 결과: true(정답)/false(오답)/null(미채점)
+    var scoreEl;
+    function renderScore(){
+      var total=state.length;
+      var done=state.filter(function(s){return s!==null;}).length;
+      var correct=state.filter(function(s){return s===true;}).length;
+      scoreEl.innerHTML='채점 <b>'+done+'/'+total+'</b>'
+        +'<br>정답 <span class="ok">'+correct+'</span> · 오답 <span class="no">'+(done-correct)+'</span>';
+    }
+    function buildScore(){
+      scoreEl=document.createElement('div'); scoreEl.id='score';
+      var right=document.createElement('div');
+      right.style.cssText='display:flex;align-items:center;gap:12px';
+      var barEl=document.querySelector('.bar');
+      barEl.appendChild(right);
+      right.appendChild(scoreEl); right.appendChild(btn); // 점수판 + 기존 버튼을 우측 묶음으로
+      renderScore();
+    }
+
+    /* ── 객관식: 보기 클릭 → 채점하기 ── */
+    function setupMC(q,det,choices,ci){
+      var lis=Array.prototype.slice.call(choices.querySelectorAll('li'));
+      if(ci>=lis.length) return;
+      var idx=state.length; state.push(null);
+      var bar=document.createElement('div'); bar.className='gradebar';
+      var gbtn=document.createElement('button'); gbtn.type='button'; gbtn.className='gradebtn';
+      gbtn.textContent='채점하기'; gbtn.disabled=true;
+      var res=document.createElement('span'); res.className='result';
+      bar.appendChild(gbtn); bar.appendChild(res);
+      det.parentNode.insertBefore(bar, det);
+      lis.forEach(function(li){
+        li.classList.add('opt');
+        li.addEventListener('click',function(){
+          if(q.classList.contains('graded')) return; // 채점 후엔 잠금
+          lis.forEach(function(x){x.classList.remove('sel');});
+          li.classList.add('sel'); gbtn.disabled=false;
+        });
+      });
+      function reset(){
+        lis.forEach(function(x){x.classList.remove('sel','correct','wrong');});
+        q.classList.remove('graded','ok','no');
+        det.open=false; res.textContent=''; res.className='result';
+        gbtn.textContent='채점하기'; gbtn.disabled=true;
+        state[idx]=null; renderScore();
+      }
+      function grade(){
+        var sel=choices.querySelector('li.sel');
+        if(!sel){ bar.classList.add('nudge'); setTimeout(function(){bar.classList.remove('nudge');},350); return; }
+        var ok=lis.indexOf(sel)===ci;
+        lis[ci].classList.add('correct');
+        if(!ok) sel.classList.add('wrong');
+        q.classList.add('graded', ok?'ok':'no');
+        det.open=true;                                // 정답보기 토글 자동 오픈
+        res.textContent=ok?'✓ 정답':'✕ 오답'; res.className='result '+(ok?'ok':'no');
+        gbtn.textContent='다시 풀기';
+        state[idx]=ok; renderScore();
+      }
+      gbtn.addEventListener('click',function(){
+        q.classList.contains('graded')?reset():grade();
+      });
+    }
+
+    /* ── 서술형/구두: 타이핑 답안 → 모범답안 확인 → 스스로 채점(O/X) ── */
+    function setupText(q,det,ph,label){
+      ph=ph||'여기에 내 답안을 적어보고 모범답안과 비교하세요…';
+      label=label||'모범답안 확인';
+      var idx=state.length; state.push(null);
+      var ta=document.createElement('textarea'); ta.className='answerbox'; ta.rows=3;
+      ta.placeholder=ph;
+      det.parentNode.insertBefore(ta, det);
+      var bar=document.createElement('div'); bar.className='gradebar';
+      det.parentNode.insertBefore(bar, det);
+      function toInitial(){
+        bar.innerHTML='';
+        var gbtn=document.createElement('button'); gbtn.type='button'; gbtn.className='gradebtn';
+        gbtn.textContent=label;
+        gbtn.addEventListener('click',function(){ det.open=true; toSelf(); }); // 모범답안 자동 오픈
+        bar.appendChild(gbtn);
+      }
+      function toSelf(){
+        bar.innerHTML='';
+        var lab=document.createElement('span'); lab.className='selflabel'; lab.textContent='스스로 채점:';
+        var okB=document.createElement('button'); okB.type='button'; okB.className='selfbtn ok'; okB.textContent='✓ 맞았음';
+        var noB=document.createElement('button'); noB.type='button'; noB.className='selfbtn no'; noB.textContent='✕ 아쉬웠음';
+        var again=document.createElement('button'); again.type='button'; again.className='gradebtn'; again.textContent='다시';
+        again.style.marginLeft='4px';
+        [lab,okB,noB,again].forEach(function(el){bar.appendChild(el);});
+        function mark(ok){
+          state[idx]=ok; q.classList.add('graded'); q.classList.toggle('ok',ok); q.classList.toggle('no',!ok);
+          okB.classList.toggle('pick',ok); noB.classList.toggle('pick',!ok); renderScore();
+        }
+        okB.addEventListener('click',function(){mark(true);});
+        noB.addEventListener('click',function(){mark(false);});
+        again.addEventListener('click',function(){
+          det.open=false; q.classList.remove('graded','ok','no'); state[idx]=null; renderScore(); toInitial();
+        });
+      }
+      toInitial();
+    }
+
+    document.querySelectorAll('.q').forEach(function(q){
+      var det=q.querySelector('details');
+      if(!det) return;                                 // 정답/해설 토글이 있는 문항만
+      var choices=q.querySelector('ol.choices');
+      var verdict=q.querySelector('.verdict');
+      var ci=verdict?CIRC.indexOf(verdict.textContent.trim().charAt(0)):-1;
+      if(choices){ if(ci>=0) setupMC(q,det,choices,ci); } // 객관식(정답 키 있을 때만)
+      else setupText(q,det);                             // 서술형/단답/쿼리작성
+    });
+
+    document.querySelectorAll('.oral').forEach(function(o){    // 구두질문
+      var det=o.querySelector('details');
+      if(!det) return;
+      setupText(o,det,'여기에 내 답변을 소리 내어 말하듯 적어보고 모범답변과 비교하세요…','모범답변 확인');
+    });
+
+    buildScore();
+  })();
+</script>

@@ -1,0 +1,466 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>C#/.NET (Java 대비) · 세트 4 — 자가채점 드릴</title>
+<style>
+  :root{
+    --card:#fffdf7; --line:#e7ddca; --ink:#2f2a22; --muted:#8a7f6c;
+    --brass:#b07d34; --danger:#c0392b;
+    --safe:#3f8f5f; --safe-bg:#eef7f0; --safe-line:#bcdcc6;
+    --slate:#4a5568; --slate-bg:#eef1f5; --chip:#f3ecdd;
+    --mono:ui-monospace,SFMono-Regular,Menlo,"Cascadia Mono","Roboto Mono",monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI","Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+    --paper:#f6f0e3;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --card:#232019; --line:#3b3529; --ink:#ece5d6; --muted:#9a8f7c;
+      --brass:#d3a05a; --danger:#e07a6e;
+      --safe:#7fc79a; --safe-bg:#1d2a22; --safe-line:#2f5340;
+      --slate:#aeb7c4; --slate-bg:#262b33; --chip:#2c2820;
+      --paper:#1a1712;
+    }
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--paper);color:var(--ink);
+    font-family:var(--sans);font-size:16px;line-height:1.6;
+    -webkit-font-smoothing:antialiased}
+  code{font-family:var(--mono);font-size:.9em;background:var(--chip);
+    padding:.1em .38em;border-radius:5px}
+  pre{margin:13px 0 0;background:var(--chip);border:1px solid var(--line);
+    border-radius:9px;padding:13px 15px;overflow-x:auto}
+  pre code{background:none;padding:0;font-size:13px;line-height:1.55;display:block}
+
+  /* 상단 바 + 진행바 */
+  .bar{position:sticky;top:0;z-index:20;display:flex;align-items:center;
+    gap:12px;flex-wrap:wrap;
+    background:color-mix(in srgb,var(--paper) 90%,transparent);
+    backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);padding:11px 20px}
+  .bar .brand{font-family:var(--mono);font-size:12.5px;font-weight:700;
+    color:var(--muted);white-space:nowrap}
+  .bar .brand b{color:var(--ink)}
+  #prog{position:fixed;top:0;left:0;height:3px;width:0;
+    background:var(--brass);z-index:30;transition:width .1s}
+  #toggleAll{font-family:var(--mono);font-size:12px;font-weight:700;
+    cursor:pointer;background:var(--slate);color:#fff;border:0;
+    border-radius:7px;padding:7px 13px;white-space:nowrap}
+  #toggleAll:hover{filter:brightness(1.1)}
+
+  main{max-width:760px;margin:0 auto;padding:26px 20px 80px}
+  header.head{margin:6px 0 26px}
+  .badge{display:inline-block;font-family:var(--mono);font-size:12px;
+    font-weight:700;color:var(--brass);background:var(--chip);
+    border:1px solid var(--line);border-radius:999px;padding:4px 12px}
+  .setno{font-family:var(--mono);font-size:12.5px;color:var(--muted);
+    margin-left:9px}
+  header.head h1{font-size:23px;margin:14px 0 6px;letter-spacing:-.01em}
+  header.head p{margin:0;color:var(--muted);font-size:14px}
+
+  .q,.oral{background:var(--card);border:1px solid var(--line);
+    border-radius:13px;padding:19px 21px;margin:16px 0;
+    transition:border-color .15s,box-shadow .15s}
+  .qnum{font-family:var(--mono);font-size:11.5px;font-weight:700;
+    color:var(--brass);letter-spacing:.03em}
+  .qtype{font-family:var(--mono);font-size:11px;color:var(--muted);
+    margin-left:7px}
+  .qtext{margin:8px 0 0;font-size:16.5px;font-weight:600;line-height:1.5}
+
+  ol.choices{counter-reset:opt;list-style:none;margin:15px 0 0;padding:0}
+  ol.choices li{counter-increment:opt;position:relative;
+    padding:9px 13px 9px 42px;margin:6px 0;border-radius:8px;
+    font-size:15px;line-height:1.45}
+  ol.choices li::before{content:counter(opt);position:absolute;left:11px;
+    top:50%;transform:translateY(-50%);
+    width:21px;height:21px;border-radius:50%;
+    border:1.5px solid var(--muted);color:var(--muted);
+    font-family:var(--mono);font-size:12px;font-weight:700;
+    display:flex;align-items:center;justify-content:center}
+
+  details{margin-top:14px;border-top:1px dashed var(--line);padding-top:2px}
+  details summary{cursor:pointer;list-style:none;
+    font-family:var(--mono);font-size:12.5px;font-weight:700;
+    color:var(--brass);padding:10px 0 4px}
+  details summary::-webkit-details-marker{display:none}
+  details summary::before{content:"▸ ";}
+  details[open] summary::before{content:"▾ ";}
+  .verdict{font-family:var(--mono);font-weight:700;color:var(--safe);
+    background:var(--safe-bg);border:1px solid var(--safe-line);
+    border-radius:8px;padding:8px 12px;margin:6px 0 0;font-size:14px}
+  .ans{margin:11px 0 2px;font-size:14.5px;line-height:1.68;color:var(--ink)}
+
+  footer.recap{margin:34px 0 0;background:var(--slate-bg);
+    border:1px solid var(--line);border-radius:13px;padding:18px 21px}
+  footer.recap h2{font-size:14px;font-family:var(--mono);
+    margin:0 0 10px;color:var(--slate)}
+  footer.recap ol{margin:0;padding-left:20px}
+  footer.recap li{font-size:14px;line-height:1.6;margin:5px 0}
+
+  /* ── 인터랙티브 채점 ── */
+  #score{font-family:var(--mono);font-size:11px;color:var(--muted);white-space:nowrap;text-align:right;line-height:1.4}
+  #score b{color:var(--ink)} #score .ok{color:var(--safe)} #score .no{color:var(--danger)}
+  ol.choices li.opt{cursor:pointer;border-radius:8px;transition:background .12s,box-shadow .12s;-webkit-tap-highlight-color:transparent}
+  ol.choices li.opt:hover{background:var(--chip)}
+  ol.choices li.sel{background:color-mix(in srgb,var(--brass) 15%,transparent)}
+  ol.choices li.sel::before{border-color:var(--brass);color:#fff;background:var(--brass)}
+  ol.choices li.correct{background:var(--safe-bg)}
+  ol.choices li.correct::before{content:"✓";border-color:var(--safe);color:#fff;background:var(--safe)}
+  ol.choices li.wrong{background:color-mix(in srgb,var(--danger) 13%,transparent)}
+  ol.choices li.wrong::before{content:"✕";border-color:var(--danger);color:#fff;background:var(--danger)}
+  .gradebar{display:flex;align-items:center;gap:11px;margin-top:13px}
+  .gradebar.nudge{animation:shake .32s}
+  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+  .gradebtn{font-family:var(--mono);font-size:12.5px;font-weight:700;cursor:pointer;
+    background:var(--slate);color:#fff;border:0;border-radius:7px;padding:7px 15px;white-space:nowrap}
+  .gradebtn:disabled{opacity:.4;cursor:not-allowed}
+  .gradebtn:not(:disabled):hover{filter:brightness(1.1)}
+  .result{font-family:var(--mono);font-size:13px;font-weight:700;display:inline-flex;align-items:center;gap:5px}
+  .result.ok{color:var(--safe)} .result.no{color:var(--danger)}
+  .q.graded.ok,.oral.graded.ok{border-color:var(--safe-line);box-shadow:0 0 0 1px var(--safe-line)}
+  .q.graded.no,.oral.graded.no{border-color:var(--danger);box-shadow:0 0 0 1px var(--danger)}
+  /* 서술형 타이핑 답안 */
+  .answerbox{display:block;width:100%;margin-top:13px;font-family:var(--sans);font-size:14.5px;line-height:1.65;
+    color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:9px;padding:10px 13px;
+    resize:vertical;min-height:66px}
+  .answerbox:focus{outline:2px solid color-mix(in srgb,var(--brass) 42%,transparent);outline-offset:1px;border-color:var(--brass)}
+  .answerbox::placeholder{color:var(--muted);opacity:.75}
+  .selflabel{font-family:var(--mono);font-size:12px;color:var(--muted)}
+  .selfbtn{font-family:var(--mono);font-size:12px;font-weight:700;cursor:pointer;border-radius:7px;
+    padding:6px 12px;border:1px solid var(--line);background:var(--card);color:var(--ink)}
+  .selfbtn.ok{border-color:var(--safe-line);color:var(--safe)} .selfbtn.ok:hover{background:var(--safe-bg)}
+  .selfbtn.no{border-color:var(--danger);color:var(--danger)} .selfbtn.no:hover{background:color-mix(in srgb,var(--danger) 8%,transparent)}
+  .selfbtn.pick{color:#fff}
+  .selfbtn.ok.pick{background:var(--safe);border-color:var(--safe)}
+  .selfbtn.no.pick{background:var(--danger);border-color:var(--danger)}
+</style>
+
+<div id="prog"></div>
+<div class="bar">
+  <span class="brand"><b>C#/.NET</b> (Java 대비) 드릴</span>
+  <button id="toggleAll" type="button">전체 정답 펼치기</button>
+</div>
+
+<main>
+  <header class="head">
+    <span class="badge">C#/.NET</span><span class="setno">세트 4 / 5</span>
+    <h1>비동기·불변 프로퍼티·접근제어부터 확장 메서드까지</h1>
+    <p>보기를 고른 뒤 <b>채점하기</b>를 누르면 정오답과 해설이 열립니다. 단답·코드읽기는 직접 적어보고 모범답안과 비교해 스스로 채점하세요.</p>
+  </header>
+
+  <!-- Q31 -->
+  <section class="q">
+    <div><span class="qnum">Q31</span><span class="qtype">객관식 · async/await Task</span></div>
+    <p class="qtext">비동기 프로그래밍 모델의 자바↔C# 대비로 옳은 것은?</p>
+    <ol class="choices">
+      <li>C#에는 비동기 개념이 없어 항상 스레드를 직접 만들어야 한다</li>
+      <li>자바 Future/CompletableFuture에 대응해 C#은 <code>Task</code>/<code>Task&lt;T&gt;</code>와 async/await 문법으로 비동기를 표현한다</li>
+      <li>async/await는 자바 키워드이고 C#은 CompletableFuture만 쓴다</li>
+      <li>C# Task는 항상 새 스레드를 만들어 병렬 실행한다</li>
+    </ol>
+    <details>
+      <summary>정답 확인</summary>
+      <div class="verdict">② 자바 Future/CompletableFuture에 대응해 C#은 Task/Task&lt;T&gt;와 async/await 문법으로 비동기를 표현한다</div>
+      <div class="ans">자바의 Future/CompletableFuture 비동기 결과에 대응해, C#은 Task/Task&lt;T&gt;를 async/await 문법으로 다뤄 비동기 코드를 동기처럼 읽히게 쓴다. await가 반드시 새 스레드를 만드는 건 아니다(I/O 대기 반납). 외부 API·DB 호출이 많은 웹 서비스에서 스레드를 놀리지 않아 처리량이 올라간다.</div>
+    </details>
+  </section>
+
+  <!-- Q32 -->
+  <section class="q">
+    <div><span class="qnum">Q32</span><span class="qtype">객관식 · .NET Framework vs .NET</span></div>
+    <p class="qtext">.NET Framework와 .NET(Core 이후) 및 자바 대비로 옳은 것은?</p>
+    <ol class="choices">
+      <li>자바가 JVM/JDK로 크로스플랫폼이듯, .NET(Core 이후)은 크로스플랫폼이고 구형 .NET Framework는 주로 Windows 전용이다</li>
+      <li>.NET Framework가 최신 크로스플랫폼이고 .NET Core가 구형 Windows 전용이다</li>
+      <li>.NET은 자바와 달리 런타임(가상머신)이 전혀 없이 기계어로만 실행된다</li>
+      <li>자바의 JVM에 해당하는 것이 .NET에는 없다</li>
+    </ol>
+    <details>
+      <summary>정답 확인</summary>
+      <div class="verdict">① 자바가 JVM/JDK로 크로스플랫폼이듯, .NET(Core 이후)은 크로스플랫폼이고 구형 .NET Framework는 주로 Windows 전용이다</div>
+      <div class="ans">자바가 JVM 위에서 크로스플랫폼으로 돌듯, 신규 .NET(Core→.NET 5/6+)은 Windows/Linux/macOS 크로스플랫폼이고 구형 .NET Framework는 Windows 전용이다. .NET에도 CLR이라는 런타임이 있어 JVM 역할을 한다. 신규 SI 프로젝트는 리눅스 배포·컨테이너를 위해 최신 .NET을 택하는 추세다.</div>
+    </details>
+  </section>
+
+  <!-- Q33 -->
+  <section class="q">
+    <div><span class="qnum">Q33</span><span class="qtype">객관식 · get-only/init 프로퍼티</span></div>
+    <p class="qtext">불변 객체를 만드는 프로퍼티 기능의 자바↔C# 대비로 옳은 것은?</p>
+    <ol class="choices">
+      <li>C#은 불변 객체를 못 만들어 모든 프로퍼티가 항상 set 가능하다</li>
+      <li><code>init</code> 접근자는 객체 생성 후에도 언제든 값을 바꿀 수 있다</li>
+      <li>자바 final과 달리 C#엔 불변을 위한 어떤 수단도 없다</li>
+      <li>자바는 final 필드+생성자로 불변을 만들고, C#은 get-only 자동 프로퍼티나 init 접근자(초기화 시에만 설정)로 불변을 표현한다</li>
+    </ol>
+    <details>
+      <summary>정답 확인</summary>
+      <div class="verdict">④ 자바는 final 필드+생성자로 불변을 만들고, C#은 get-only 자동 프로퍼티나 init 접근자(초기화 시에만 설정)로 불변을 표현한다</div>
+      <div class="ans">자바는 final 필드 + 생성자 주입으로 불변을 만들고, C#은 <code>{ get; }</code>(get-only)나 <code>{ get; init; }</code>(객체 초기화 시점에만 설정)로 같은 목적을 달성한다. init은 생성 이후 변경을 막는다. 설정값·DTO 등 생성 후 바뀌면 안 되는 객체에 불변을 걸어 예측 가능성과 스레드 안전성을 높인다.</div>
+    </details>
+  </section>
+
+  <!-- Q34 -->
+  <section class="q">
+    <div><span class="qnum">Q34</span><span class="qtype">객관식 · out/ref 매개변수</span></div>
+    <p class="qtext">메서드 인자 전달의 자바↔C# 차이로 옳은 것은?</p>
+    <ol class="choices">
+      <li>자바도 ref 키워드로 변수를 참조 전달할 수 있다</li>
+      <li>C#의 out은 자바 return과 완전히 동일해 아무 차이가 없다</li>
+      <li>자바는 항상 값 전달(참조 타입은 참조값을 복사)만 되지만, C#은 ref/out 키워드로 변수 자체를 참조로 넘겨 호출부 변수를 바꿀 수 있다</li>
+      <li>C#은 참조 전달만 되고 값 전달이 불가능하다</li>
+    </ol>
+    <details>
+      <summary>정답 확인</summary>
+      <div class="verdict">③ 자바는 항상 값 전달(참조 타입은 참조값을 복사)만 되지만, C#은 ref/out 키워드로 변수 자체를 참조로 넘겨 호출부 변수를 바꿀 수 있다</div>
+      <div class="ans">자바는 값 전달만 지원해 원시값이든 참조값이든 복사본이 넘어간다. C#은 ref(초기화된 변수를 참조로)와 out(메서드 내에서 반드시 대입, 여러 값 반환용)으로 호출부 변수 자체를 바꿀 수 있다. TryParse처럼 성공 여부+결과를 함께 돌려주는 실무 API가 out을 쓴다.</div>
+    </details>
+  </section>
+
+  <!-- Q35 -->
+  <section class="q">
+    <div><span class="qnum">Q35</span><span class="qtype">객관식 · enum</span></div>
+    <p class="qtext">열거형(enum)의 자바↔C# 대비로 옳은 것은?</p>
+    <ol class="choices">
+      <li>C# enum은 자바처럼 각 상수마다 메서드 본문을 정의하는 완전한 클래스다</li>
+      <li>자바 enum은 메서드·필드를 가질 수 있는 완전한 클래스지만, C# enum은 기본적으로 정수형(int 등) 기반의 이름 붙은 상수 집합이다</li>
+      <li>자바 enum과 C# enum 모두 문자열 리터럴 기반이라 정수 변환이 불가능하다</li>
+      <li>enum은 자바에만 있고 C#은 const 묶음으로만 대체한다</li>
+    </ol>
+    <details>
+      <summary>정답 확인</summary>
+      <div class="verdict">② 자바 enum은 메서드·필드를 가질 수 있는 완전한 클래스지만, C# enum은 기본적으로 정수형(int 등) 기반의 이름 붙은 상수 집합이다</div>
+      <div class="ans">자바 enum은 상수마다 동작·필드를 가질 수 있는 강력한 클래스형이지만, C# enum은 기본적으로 int 등 정수형에 이름을 붙인 경량 상수 집합이라 정수 캐스팅이 자유롭다(C#은 동작이 필요하면 확장 메서드 등으로 보완). 상태 코드·구분값 매핑에 쓰되, C# enum은 정의 안 된 정수도 담길 수 있어 검증이 필요하다.</div>
+    </details>
+  </section>
+
+  <!-- Q36 -->
+  <section class="q">
+    <div><span class="qnum">Q36</span><span class="qtype">객관식 · 문자열 보간</span></div>
+    <p class="qtext">변수를 문자열에 끼워 넣는 방식의 자바↔C# 대비로 옳은 것은?</p>
+    <ol class="choices">
+      <li>자바는 <code>String.format("%s", x)</code>나 + 연결을, C#은 문자열 보간 <code>$"{x}"</code> 문법을 제공한다</li>
+      <li>C#에는 문자열 포매팅 기능이 없어 항상 + 로만 연결한다</li>
+      <li>자바 String.format과 C# <code>$"..."</code>는 문법이 완전히 동일하다</li>
+      <li>문자열 보간은 자바 전용이고 C#은 지원하지 않는다</li>
+    </ol>
+    <details>
+      <summary>정답 확인</summary>
+      <div class="verdict">① 자바는 String.format("%s", x)나 + 연결을, C#은 문자열 보간 $"{x}" 문법을 제공한다</div>
+      <div class="ans">자바는 <code>String.format("%s살", age)</code>나 + 연결로 값을 끼우고, C#은 <code>$"{age}살"</code> 보간 문법으로 변수를 인라인한다(C#에도 string.Format 존재). 보간은 가독성이 좋고 오타를 줄인다. 로그 메시지·화면 문구 조립에서 자주 쓰여 유지보수 가독성을 높인다.</div>
+    </details>
+  </section>
+
+  <!-- Q37 -->
+  <section class="q">
+    <div><span class="qnum">Q37</span><span class="qtype">객관식 · 확장 메서드</span></div>
+    <p class="qtext">기존 타입에 메서드를 덧붙이는 C# 확장 메서드에 대한 자바 대비 설명으로 옳은 것은?</p>
+    <ol class="choices">
+      <li>확장 메서드는 기존 타입의 소스를 직접 수정해 메서드를 넣는 기능이다</li>
+      <li>자바에도 확장 메서드 키워드가 있어 C#과 문법이 같다</li>
+      <li>C#은 유틸리티 정적 메서드를 아예 만들 수 없다</li>
+      <li>자바는 별도 유틸리티 클래스의 정적 메서드로 기능을 보완하지만, C#은 확장 메서드로 기존 타입에 인스턴스 메서드처럼 보이는 기능을 추가한다</li>
+    </ol>
+    <details>
+      <summary>정답 확인</summary>
+      <div class="verdict">④ 자바는 별도 유틸리티 클래스의 정적 메서드로 기능을 보완하지만, C#은 확장 메서드로 기존 타입에 인스턴스 메서드처럼 보이는 기능을 추가한다</div>
+      <div class="ans">자바는 <code>StringUtils.isEmpty(s)</code>처럼 유틸 클래스 정적 메서드로 보완하지만, C#은 확장 메서드로 <code>s.IsEmpty()</code>처럼 원래 타입에 메서드가 있는 듯 호출하게 한다(실제로는 정적 메서드, this 매개변수). 원본 타입을 못 고치는 외부 라이브러리 타입에 팀 공용 헬퍼를 붙일 때 유용하다.</div>
+    </details>
+  </section>
+
+  <!-- Q38 -->
+  <section class="q">
+    <div><span class="qnum">Q38</span><span class="qtype">객관식 · protected internal</span></div>
+    <p class="qtext">C#의 <code>protected internal</code> 접근제어자에 대한 자바 대비 설명으로 옳은 것은?</p>
+    <ol class="choices">
+      <li>같은 어셈블리이면서 "동시에" 파생 클래스일 때만 접근 가능하다(교집합)</li>
+      <li>자바 protected와 완전히 동일해 같은 패키지에서만 접근된다</li>
+      <li>자바엔 없는 조합으로, 같은 어셈블리(internal) "또는" 파생 클래스(protected) 어디서든 접근 가능하다(합집합)</li>
+      <li>private보다 좁은 최소 접근 범위를 뜻한다</li>
+    </ol>
+    <details>
+      <summary>정답 확인</summary>
+      <div class="verdict">③ 자바엔 없는 조합으로, 같은 어셈블리(internal) "또는" 파생 클래스(protected) 어디서든 접근 가능하다(합집합)</div>
+      <div class="ans">C#의 protected internal은 protected(파생 클래스) "또는" internal(같은 어셈블리)의 합집합 접근이다(교집합은 별도 키워드 private protected). 자바엔 이런 조합 자체가 없고 protected가 같은 패키지+하위 클래스를 커버하는 등 의미가 다르다. 라이브러리 확장점을 설계할 때 노출 범위를 정확히 지정하는 데 쓴다.</div>
+    </details>
+  </section>
+
+  <!-- Q39 -->
+  <section class="q">
+    <div><span class="qnum">Q39</span><span class="qtype">코드읽기 · async 실행 순서</span></div>
+    <p class="qtext">다음 C# 코드의 출력 순서는? 자바 CompletableFuture와 대비하며 읽어라.</p>
+    <pre><code>async Task RunAsync() {
+    Console.WriteLine("A");
+    await Task.Delay(100);
+    Console.WriteLine("C");
+}
+Console.WriteLine("start");
+var t = RunAsync();
+Console.WriteLine("B");
+await t;</code></pre>
+    <details>
+      <summary>모범답안 확인</summary>
+      <div class="verdict">모범답안 · start → A → B → C</div>
+      <div class="ans">RunAsync 호출 시 await 전까지 동기 실행되어 "A"가 먼저 찍히고, <code>await Task.Delay</code>에서 제어가 호출부로 반환돼 "B"가 찍힌다. 지연이 끝나면 "C"가 이어진다(<code>await t</code>가 완료를 기다림). 자바 CompletableFuture 체인과 개념은 같으나 async/await는 흐름이 순차 코드처럼 읽힌다. 외부 호출 대기 중 다른 일을 처리하는 웹 서비스의 핵심 동작이다.</div>
+    </details>
+  </section>
+
+  <!-- Q40 -->
+  <section class="q">
+    <div><span class="qnum">Q40</span><span class="qtype">단답 · object 최상위</span></div>
+    <p class="qtext">자바의 모든 클래스의 최상위 부모는 <code>java.lang.Object</code>다. C#에서 이에 대응하는 모든 타입의 최상위 기반 타입을 키워드와 정식 이름으로 쓰시오.</p>
+    <details>
+      <summary>모범답안 확인</summary>
+      <div class="verdict">모범답안 · object (정식 이름 System.Object)</div>
+      <div class="ans">자바의 <code>java.lang.Object</code>에 대응하는 C#의 최상위 타입은 <code>object</code>(별칭)이며 정식 이름은 <code>System.Object</code>다. ToString/Equals/GetHashCode 등 공통 메서드도 대응된다(자바 toString ↔ C# ToString). 공용 로깅·직렬화 유틸이 object 파라미터로 임의 타입을 받는 근거가 된다.</div>
+    </details>
+  </section>
+
+  <footer class="recap">
+    <h2>이 세트 우선복습 3줄</h2>
+    <ol>
+      <li><b>async/await ≠ 새 스레드</b> — <code>await</code>는 I/O 대기 중 제어를 반납할 뿐 반드시 스레드를 새로 만들지 않는다. 출력 순서는 <code>start→A→B→C</code>.</li>
+      <li><b>ref/out vs 자바 값 전달</b> — 자바는 언제나 값(참조값 복사) 전달, C#은 ref/out으로 호출부 변수 자체를 바꾼다. TryParse의 out이 대표 예.</li>
+      <li><b>protected internal은 합집합</b> — internal <em>또는</em> protected(어느 한쪽만 만족해도 접근). 교집합은 별도 키워드 <code>private protected</code>.</li>
+    </ol>
+  </footer>
+</main>
+
+<script>
+  (function(){
+    /* 스크롤 진행바 */
+    var prog=document.getElementById('prog');
+    var doc=document.documentElement;
+    function onScroll(){
+      var pct=doc.scrollTop/(doc.scrollHeight-doc.clientHeight)*100;
+      prog.style.width=(pct||0)+'%';
+    }
+    document.addEventListener('scroll',onScroll,{passive:true}); onScroll();
+
+    /* 전체 정답 펼치기 */
+    var btn=document.getElementById('toggleAll'), open=false;
+    btn.addEventListener('click',function(){
+      open=!open;
+      document.querySelectorAll('details').forEach(function(d){d.open=open;});
+      btn.textContent=open?'전체 정답 접기':'전체 정답 펼치기';
+    });
+
+    /* ── 채점 상태/점수판 ── 정답은 .verdict 앞머리의 원문자(①②③④)에서 자동 추출 ── */
+    var CIRC='①②③④⑤⑥⑦⑧⑨⑩';
+    var state=[];   // 문항별 채점 결과: true(정답)/false(오답)/null(미채점)
+    var scoreEl;
+    function renderScore(){
+      var total=state.length;
+      var done=state.filter(function(s){return s!==null;}).length;
+      var correct=state.filter(function(s){return s===true;}).length;
+      scoreEl.innerHTML='채점 <b>'+done+'/'+total+'</b>'
+        +'<br>정답 <span class="ok">'+correct+'</span> · 오답 <span class="no">'+(done-correct)+'</span>';
+    }
+    function buildScore(){
+      scoreEl=document.createElement('div'); scoreEl.id='score';
+      var right=document.createElement('div');
+      right.style.cssText='display:flex;align-items:center;gap:12px';
+      var barEl=document.querySelector('.bar');
+      barEl.appendChild(right);
+      right.appendChild(scoreEl); right.appendChild(btn); // 점수판 + 기존 버튼을 우측 묶음으로
+      renderScore();
+    }
+
+    /* ── 객관식: 보기 클릭 → 채점하기 ── */
+    function setupMC(q,det,choices,ci){
+      var lis=Array.prototype.slice.call(choices.querySelectorAll('li'));
+      if(ci>=lis.length) return;
+      var idx=state.length; state.push(null);
+      var bar=document.createElement('div'); bar.className='gradebar';
+      var gbtn=document.createElement('button'); gbtn.type='button'; gbtn.className='gradebtn';
+      gbtn.textContent='채점하기'; gbtn.disabled=true;
+      var res=document.createElement('span'); res.className='result';
+      bar.appendChild(gbtn); bar.appendChild(res);
+      det.parentNode.insertBefore(bar, det);
+      lis.forEach(function(li){
+        li.classList.add('opt');
+        li.addEventListener('click',function(){
+          if(q.classList.contains('graded')) return; // 채점 후엔 잠금
+          lis.forEach(function(x){x.classList.remove('sel');});
+          li.classList.add('sel'); gbtn.disabled=false;
+        });
+      });
+      function reset(){
+        lis.forEach(function(x){x.classList.remove('sel','correct','wrong');});
+        q.classList.remove('graded','ok','no');
+        det.open=false; res.textContent=''; res.className='result';
+        gbtn.textContent='채점하기'; gbtn.disabled=true;
+        state[idx]=null; renderScore();
+      }
+      function grade(){
+        var sel=choices.querySelector('li.sel');
+        if(!sel){ bar.classList.add('nudge'); setTimeout(function(){bar.classList.remove('nudge');},350); return; }
+        var ok=lis.indexOf(sel)===ci;
+        lis[ci].classList.add('correct');
+        if(!ok) sel.classList.add('wrong');
+        q.classList.add('graded', ok?'ok':'no');
+        det.open=true;                                // 정답보기 토글 자동 오픈
+        res.textContent=ok?'✓ 정답':'✕ 오답'; res.className='result '+(ok?'ok':'no');
+        gbtn.textContent='다시 풀기';
+        state[idx]=ok; renderScore();
+      }
+      gbtn.addEventListener('click',function(){
+        q.classList.contains('graded')?reset():grade();
+      });
+    }
+
+    /* ── 서술형/구두: 타이핑 답안 → 모범답안 확인 → 스스로 채점(O/X) ── */
+    function setupText(q,det,ph,label){
+      ph=ph||'여기에 내 답안을 적어보고 모범답안과 비교하세요…';
+      label=label||'모범답안 확인';
+      var idx=state.length; state.push(null);
+      var ta=document.createElement('textarea'); ta.className='answerbox'; ta.rows=3;
+      ta.placeholder=ph;
+      det.parentNode.insertBefore(ta, det);
+      var bar=document.createElement('div'); bar.className='gradebar';
+      det.parentNode.insertBefore(bar, det);
+      function toInitial(){
+        bar.innerHTML='';
+        var gbtn=document.createElement('button'); gbtn.type='button'; gbtn.className='gradebtn';
+        gbtn.textContent=label;
+        gbtn.addEventListener('click',function(){ det.open=true; toSelf(); }); // 모범답안 자동 오픈
+        bar.appendChild(gbtn);
+      }
+      function toSelf(){
+        bar.innerHTML='';
+        var lab=document.createElement('span'); lab.className='selflabel'; lab.textContent='스스로 채점:';
+        var okB=document.createElement('button'); okB.type='button'; okB.className='selfbtn ok'; okB.textContent='✓ 맞았음';
+        var noB=document.createElement('button'); noB.type='button'; noB.className='selfbtn no'; noB.textContent='✕ 아쉬웠음';
+        var again=document.createElement('button'); again.type='button'; again.className='gradebtn'; again.textContent='다시';
+        again.style.marginLeft='4px';
+        [lab,okB,noB,again].forEach(function(el){bar.appendChild(el);});
+        function mark(ok){
+          state[idx]=ok; q.classList.add('graded'); q.classList.toggle('ok',ok); q.classList.toggle('no',!ok);
+          okB.classList.toggle('pick',ok); noB.classList.toggle('pick',!ok); renderScore();
+        }
+        okB.addEventListener('click',function(){mark(true);});
+        noB.addEventListener('click',function(){mark(false);});
+        again.addEventListener('click',function(){
+          det.open=false; q.classList.remove('graded','ok','no'); state[idx]=null; renderScore(); toInitial();
+        });
+      }
+      toInitial();
+    }
+
+    document.querySelectorAll('.q').forEach(function(q){
+      var det=q.querySelector('details');
+      if(!det) return;                                 // 정답/해설 토글이 있는 문항만
+      var choices=q.querySelector('ol.choices');
+      var verdict=q.querySelector('.verdict');
+      var ci=verdict?CIRC.indexOf(verdict.textContent.trim().charAt(0)):-1;
+      if(choices){ if(ci>=0) setupMC(q,det,choices,ci); } // 객관식(정답 키 있을 때만)
+      else setupText(q,det);                             // 서술형/단답/쿼리작성
+    });
+
+    document.querySelectorAll('.oral').forEach(function(o){    // 구두질문
+      var det=o.querySelector('details');
+      if(!det) return;
+      setupText(o,det,'여기에 내 답변을 소리 내어 말하듯 적어보고 모범답변과 비교하세요…','모범답변 확인');
+    });
+
+    buildScore();
+  })();
+</script>
